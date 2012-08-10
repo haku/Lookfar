@@ -3,6 +3,7 @@ package com.vaguehope.lookfar.servlet;
 import static com.vaguehope.lookfar.servlet.ServletHelper.validateStringParam;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,16 +32,10 @@ public class UpdateServlet extends HttpServlet {
 		String node = validateStringParam(req, resp, PARAM_NODE);
 		if (node == null) return;
 
-		Map<String, String> params = toStringMap(req.getParameterMap());
-		LOG.info("TODO update '{}': {}", node, params);
-	}
-
-	private static Map<String, String> toStringMap (Map<?,?> in) {
-		HashMap<String, String> ret = Maps.newHashMap();
-		for (Entry<?, ?> e : in.entrySet()) {
-			ret.put(e.getKey().toString(), e.getValue().toString());
+		HashMap<String, String> data = Maps.newHashMap();
+		for (Entry<String, String[]> e : ((Map<String, String[]>) req.getParameterMap()).entrySet()) {
+			data.put(e.getKey(), Arrays.toString(e.getValue()));
 		}
-		return ret;
+		LOG.info("TODO update '{}': {}", node, data);
 	}
-
 }
