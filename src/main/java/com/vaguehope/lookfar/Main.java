@@ -6,11 +6,13 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaguehope.lookfar.reporter.JvmReporter;
 import com.vaguehope.lookfar.reporter.Reporter;
+import com.vaguehope.lookfar.servlet.EchoServlet;
 
 public class Main {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -32,6 +34,9 @@ public class Main {
 		ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		servletHandler.setContextPath("/");
 
+		// Servlets.
+		servletHandler.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
+
 		// Static files on classpath.
 		ResourceHandler resourceHandler = new ResourceHandler();
 		resourceHandler.setDirectoriesListed(false);
@@ -43,8 +48,8 @@ public class Main {
 				);
 
 		// Prepare final handler.
-		HandlerList handlers = new HandlerList();
-		handlers.setHandlers(new Handler[] { resourceHandler, servletHandler });
+		HandlerList handler = new HandlerList();
+		handler.setHandlers(new Handler[] { resourceHandler, servletHandler });
 
 		// Listening connector.
 		String portString = System.getenv("PORT"); // Heroko pattern.
@@ -58,7 +63,7 @@ public class Main {
 
 		// Start server.
 		this.server = new Server();
-		this.server.setHandler(handlers);
+		this.server.setHandler(handler);
 		this.server.addConnector(connector);
 		this.server.start();
 		LOG.info("Server ready on port " + portString + ".");
