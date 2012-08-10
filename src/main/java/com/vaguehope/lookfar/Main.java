@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaguehope.lookfar.auth.BasicAuthFilter;
-import com.vaguehope.lookfar.auth.PasswdChecker;
+import com.vaguehope.lookfar.auth.HerokoHttpsFilter;
 import com.vaguehope.lookfar.auth.SharedPasswd;
 import com.vaguehope.lookfar.reporter.JvmReporter;
 import com.vaguehope.lookfar.reporter.Reporter;
@@ -48,16 +48,16 @@ public class Main {
 		resourceHandler.setDirectoriesListed(false);
 		resourceHandler.setWelcomeFiles(new String[] { "index.html" });
 		resourceHandler.setResourceBase(
-				Boolean.parseBoolean(System.getenv("DEBUG")) ?
+				Modes.isDebug() ?
 						"./src/main/resources/webroot" :
 						Main.class.getResource("/webroot").toExternalForm()
 				);
 
-		// Auth filter to control access.
-		PasswdChecker passwdChecker = new SharedPasswd("m0ard3su");
-		Filter authFilter = new BasicAuthFilter(passwdChecker);
-		FilterHolder filterHolder = new FilterHolder(authFilter);
-		servletHandler.addFilter(filterHolder, "/*", null);
+		// Filters to control access.
+		if (Modes.isSecure()) {
+			addFilter(servletHandler, new HerokoHttpsFilter());
+		}
+		addFilter(servletHandler, new BasicAuthFilter(new SharedPasswd("m0ard3su")));
 
 		// Prepare final handler.
 		HandlerList handler = new HandlerList();
@@ -79,6 +79,11 @@ public class Main {
 		this.server.addConnector(connector);
 		this.server.start();
 		LOG.info("Server ready on port " + portString + ".");
+	}
+
+	public void addFilter (ServletContextHandler handler, Filter httpsFilter) {
+		FilterHolder holder = new FilterHolder(httpsFilter);
+		handler.addFilter(holder, "/*", null);
 	}
 
 	public void join () throws InterruptedException {

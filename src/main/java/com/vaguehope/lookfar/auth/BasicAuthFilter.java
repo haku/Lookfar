@@ -52,7 +52,7 @@ public class BasicAuthFilter implements Filter {
 		if (authHeader64 == null
 				|| authHeader64.length() < Http.HEADER_AUTHORISATION_PREFIX.length() + 3
 				|| !authHeader64.startsWith(Http.HEADER_AUTHORISATION_PREFIX)) {
-			LOG.info("Auth failed: header={}", authHeader64);
+			LOG.info("Auth failed: for={} header={}", req.getHeader("X-Forwarded-For"), authHeader64);
 			send401(resp);
 			return;
 		}
@@ -64,7 +64,7 @@ public class BasicAuthFilter implements Filter {
 		String user = authHeader.substring(0, x);
 		String pass = authHeader.substring(x + 1);
 		if (user == null || pass == null || user.isEmpty() || pass.isEmpty() || !checkUser(user, pass)) {
-			LOG.info("Auth failed: user={} pass={}", user, pass);
+			LOG.info("Auth failed: for={} user={} pass={}", new Object[] { req.getHeader("X-Forwarded-For"), user, pass });
 			send401(resp);
 			return;
 		}
