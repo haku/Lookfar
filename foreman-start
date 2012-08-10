@@ -1,0 +1,9 @@
+#!/bin/sh
+CONFIG="$HOME/.lookfar"
+if [ -e "$CONFIG" ] ; then
+  . "$CONFIG"
+fi
+if [ -n "$PORT" ] ; then
+  FOREMAN_OPTS="$FOREMAN_OPTS -p $PORT"
+fi
+mvn install && foreman start $FOREMAN_OPTS
