@@ -1,15 +1,21 @@
 package com.vaguehope.lookfar;
 
+import javax.servlet.Filter;
+
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaguehope.lookfar.auth.BasicAuthFilter;
+import com.vaguehope.lookfar.auth.PasswdChecker;
+import com.vaguehope.lookfar.auth.SharedPasswd;
 import com.vaguehope.lookfar.reporter.JvmReporter;
 import com.vaguehope.lookfar.reporter.Reporter;
 import com.vaguehope.lookfar.servlet.EchoServlet;
@@ -46,6 +52,12 @@ public class Main {
 						"./src/main/resources/webroot" :
 						Main.class.getResource("/webroot").toExternalForm()
 				);
+
+		// Auth filter to control access.
+		PasswdChecker passwdChecker = new SharedPasswd("m0ard3su");
+		Filter authFilter = new BasicAuthFilter(passwdChecker);
+		FilterHolder filterHolder = new FilterHolder(authFilter);
+		servletHandler.addFilter(filterHolder, "/*", null);
 
 		// Prepare final handler.
 		HandlerList handler = new HandlerList();
