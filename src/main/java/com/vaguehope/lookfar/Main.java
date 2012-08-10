@@ -19,6 +19,7 @@ import com.vaguehope.lookfar.auth.SharedPasswd;
 import com.vaguehope.lookfar.reporter.JvmReporter;
 import com.vaguehope.lookfar.reporter.Reporter;
 import com.vaguehope.lookfar.servlet.EchoServlet;
+import com.vaguehope.lookfar.servlet.UpdateServlet;
 
 public class Main {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -42,6 +43,7 @@ public class Main {
 
 		// Servlets.
 		servletHandler.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
+		servletHandler.addServlet(new ServletHolder(new UpdateServlet()), UpdateServlet.CONTEXT);
 
 		// Static files on classpath.
 		ResourceHandler resourceHandler = new ResourceHandler();
