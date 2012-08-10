@@ -6,7 +6,7 @@
 
 	<appender name="default" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %.-1level %logger{30} %msg%n</pattern>
+			<pattern>[%thread] %.-1level %logger{30} %msg%n</pattern>
 		</encoder>
 	</appender>
 
