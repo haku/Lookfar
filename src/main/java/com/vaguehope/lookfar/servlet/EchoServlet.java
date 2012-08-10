@@ -41,14 +41,20 @@ public class EchoServlet extends HttpServlet {
 		Enumeration headerNames = req.getHeaderNames();
 		while(headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement().toString();
-			w.println("header:" + headerName + "=" + req.getHeaders(headerName));
+			@SuppressWarnings("rawtypes")
+			Enumeration headerValues = req.getHeaders(headerName);
+			while(headerValues.hasMoreElements()) {
+				w.println("header:" + headerName + "=" + headerValues.nextElement());
+			}
 		}
 
 		@SuppressWarnings("rawtypes")
 		Enumeration paramNames = req.getParameterNames();
 		while(paramNames.hasMoreElements()) {
 			String paramName = paramNames.nextElement().toString();
-			w.println("param:" + paramName + "=" + req.getParameterValues(paramName));
+			for (String paramValue : req.getParameterValues(paramName)) {
+				w.println("param:" + paramName + "=" + paramValue);
+			}
 		}
 
 		@SuppressWarnings("rawtypes")
