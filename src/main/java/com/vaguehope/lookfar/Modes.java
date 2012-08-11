@@ -13,4 +13,8 @@ public final class Modes {
 		return e == null || e.isEmpty() || !e.equalsIgnoreCase("false");
 	}
 
+	public static boolean isPostgresSsl () {
+		return Boolean.parseBoolean(System.getenv("POSTGRES_SSL"));
+	}
+
 }

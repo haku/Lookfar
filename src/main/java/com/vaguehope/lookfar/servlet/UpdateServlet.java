@@ -3,6 +3,7 @@ package com.vaguehope.lookfar.servlet;
 import static com.vaguehope.lookfar.servlet.ServletHelper.validateStringParam;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
+import com.vaguehope.lookfar.DataStore;
 
 public class UpdateServlet extends HttpServlet {
 
@@ -24,8 +26,13 @@ public class UpdateServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1157053289236694746L;
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateServlet.class);
-
 	private static final String PARAM_NODE = "node";
+
+	private final DataStore dataStore;
+
+	public UpdateServlet (DataStore dataStore) {
+		this.dataStore = dataStore;
+	}
 
 	@Override
 	protected void doPost (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -33,9 +40,16 @@ public class UpdateServlet extends HttpServlet {
 		if (node == null) return;
 
 		HashMap<String, String> data = Maps.newHashMap();
-		for (Entry<String, String[]> e : ((Map<String, String[]>) req.getParameterMap()).entrySet()) {
-			data.put(e.getKey(), Arrays.toString(e.getValue()));
+		for (Entry<String, String[]> datum : ((Map<String, String[]>) req.getParameterMap()).entrySet()) {
+			if (PARAM_NODE.equals(datum.getKey())) continue;
+			data.put(datum.getKey(), Arrays.toString(datum.getValue()));
 		}
-		LOG.info("TODO update '{}': {}", node, data);
+		try {
+			this.dataStore.update(node, data);
+		}
+		catch (SQLException e) {
+			LOG.warn("Failed to store data.", e);
+			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to store data: " + e.getMessage());
+		}
 	}
 }

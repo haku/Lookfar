@@ -1,0 +1,8 @@
+== Database Create ==
+<pre>
+create table updates (node VARCHAR(16), updated TIMESTAMP, key VARCHAR(255), value VARCHAR(255));
+</pre>
+
+=== References ===
+* http://www.postgresql.org/docs/9.1/static/sql-createtable.html
+* http://www.postgresql.org/docs/9.1/static/datatype.html

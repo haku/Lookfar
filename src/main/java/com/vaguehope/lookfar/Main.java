@@ -37,13 +37,16 @@ public class Main {
 		Reporter reporter = new Reporter(new JvmReporter());
 		reporter.start();
 
+		// Database.
+		DataStore dataStore = new DataStore();
+
 		// Servlet container.
 		ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		servletHandler.setContextPath("/");
 
 		// Servlets.
 		servletHandler.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
-		servletHandler.addServlet(new ServletHolder(new UpdateServlet()), UpdateServlet.CONTEXT);
+		servletHandler.addServlet(new ServletHolder(new UpdateServlet(dataStore)), UpdateServlet.CONTEXT);
 
 		// Static files on classpath.
 		ResourceHandler resourceHandler = new ResourceHandler();
