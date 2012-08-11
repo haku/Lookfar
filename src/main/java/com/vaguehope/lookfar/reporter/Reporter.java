@@ -13,7 +13,7 @@ public class Reporter extends TimerTask {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Reporter.class);
 
-	private final Timer timer = new Timer();
+	private final Timer timer = new Timer("reporter", true);
 	private final ReportProvider[] providers;
 
 	public Reporter (ReportProvider... providers) {
