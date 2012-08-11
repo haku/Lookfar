@@ -26,6 +26,7 @@ public class EchoServlet extends HttpServlet {
 		w.println("Scheme=" + req.getScheme());
 		w.println("Method=" + req.getMethod());
 		w.println("RequestURI=" + req.getRequestURI());
+		w.println("RequestURL=" + req.getRequestURL());
 		w.println("ContextPath=" + req.getContextPath());
 		w.println("PathInfo=" + req.getPathInfo());
 		w.println("PathTranslated=" + req.getPathTranslated());
