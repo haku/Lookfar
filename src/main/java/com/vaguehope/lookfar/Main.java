@@ -62,7 +62,7 @@ public class Main {
 		if (Modes.isSecure()) {
 			addFilter(servletHandler, new HerokoHttpsFilter());
 		}
-		addFilter(servletHandler, new BasicAuthFilter(new SharedPasswd("m0ard3su")));
+		addFilter(servletHandler, new BasicAuthFilter(new SharedPasswd()));
 
 		// Prepare final handler.
 		HandlerList handler = new HandlerList();
