@@ -4,7 +4,6 @@ import static com.vaguehope.lookfar.servlet.ServletHelper.validateStringParam;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,7 +41,7 @@ public class UpdateServlet extends HttpServlet {
 		HashMap<String, String> data = Maps.newHashMap();
 		for (Entry<String, String[]> datum : ((Map<String, String[]>) req.getParameterMap()).entrySet()) {
 			if (PARAM_NODE.equals(datum.getKey())) continue;
-			data.put(datum.getKey(), Arrays.toString(datum.getValue()));
+			data.put(datum.getKey(), arrToString(datum.getValue()));
 		}
 		try {
 			this.dataStore.update(node, data);
@@ -51,5 +50,16 @@ public class UpdateServlet extends HttpServlet {
 			LOG.warn("Failed to store data.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to store data: " + e.getMessage());
 		}
+	}
+
+	private static String arrToString (String[] arr) {
+		if (arr == null) return "null";
+		if (arr.length < 1) return "";
+		if (arr.length == 1) return arr[0];
+		StringBuilder ret = new StringBuilder(arr[0]);
+		for (String a : arr) {
+			ret.append(", ").append(a);
+		}
+		return ret.toString();
 	}
 }
