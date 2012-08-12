@@ -1,16 +1,23 @@
-package com.vaguehope.lookfar;
+package com.vaguehope.lookfar.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.vaguehope.lookfar.Modes;
 
 /**
  * http://jdbc.postgresql.org/documentation/91/index.html
@@ -39,6 +46,30 @@ public class DataStore {
 		Connection conn = DriverManager.getConnection(dbUrl, username, password);
 		LOG.info("Postgres DB connect: {}", dbUrl);
 		return conn;
+	}
+
+	public List<Update> readAllUpdates () throws SQLException {
+		List<Update> ret = Lists.newArrayList();
+		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value FROM updates ORDER BY node, key");
+		try {
+			ResultSet rs = st.executeQuery();
+			try {
+				while (rs.next()) {
+					String node = rs.getString(1);
+					Date updated = timestampToDate(rs.getTimestamp(2));
+					String key = rs.getString(3);
+					String value = rs.getString(4);
+					ret.add(new Update(node, updated, key, value));
+				}
+				return ret;
+			}
+			finally {
+				rs.close();
+			}
+		}
+		finally {
+			st.close();
+		}
 	}
 
 	public void update (String node, HashMap<String, String> data) throws SQLException {
@@ -73,6 +104,10 @@ public class DataStore {
 		finally {
 			stInsert.close();
 		}
+	}
+
+	private static Date timestampToDate (Timestamp t) {
+		return t == null ? null : new Date(t.getTime());
 	}
 
 }

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.vaguehope.lookfar.auth.BasicAuthFilter;
 import com.vaguehope.lookfar.auth.HerokoHttpsFilter;
 import com.vaguehope.lookfar.auth.SharedPasswd;
+import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.reporter.JvmReporter;
 import com.vaguehope.lookfar.reporter.Reporter;
 import com.vaguehope.lookfar.servlet.EchoServlet;

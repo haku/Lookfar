@@ -15,11 +15,9 @@ public class EchoServlet extends HttpServlet {
 
 	public static final String CONTEXT = "/echo";
 
-	private static final String CONTENT_TYPE_PLAIN = "text/plain;charset=UTF-8"; // TODO move to constants file.
-
 	@Override
 	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.setContentType(CONTENT_TYPE_PLAIN);
+		resp.setContentType(ServletHelper.CONTENT_TYPE_PLAIN);
 		PrintWriter w = resp.getWriter();
 
 		w.println("Protocol=" + req.getProtocol());

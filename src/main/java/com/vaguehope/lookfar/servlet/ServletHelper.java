@@ -11,7 +11,9 @@ import javax.servlet.http.HttpSession;
 public final class ServletHelper {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	private static final String ROOTPATH = "/";
+	public static final String ROOT_PATH = "/";
+	public static final String CONTENT_TYPE_PLAIN = "text/plain;charset=UTF-8";
+	public static final String CONTENT_TYPE_HTML = "text/html;charset=UTF-8";
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -58,7 +60,7 @@ public final class ServletHelper {
 	public static String requestSubPath (HttpServletRequest req, String baseContext) {
 		String requestURI = req.getRequestURI();
 		String reqPath = requestURI.startsWith(baseContext) ? requestURI.substring(baseContext.length()) : requestURI;
-		return reqPath.startsWith(ROOTPATH) ? reqPath.substring(ROOTPATH.length()) : reqPath;
+		return reqPath.startsWith(ROOT_PATH) ? reqPath.substring(ROOT_PATH.length()) : reqPath;
 	}
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
