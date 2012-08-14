@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -41,14 +42,13 @@ public class UpdateServlet extends HttpServlet {
 
 	@Override
 	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Table<Integer, String, String> table = TreeBasedTable.create();
 		try {
 			int i = 0;
 			for (Update u : this.dataStore.readAllUpdates()) {
 				Integer row = Integer.valueOf(i++);
 				table.put(row, "node", u.getNode());
-				table.put(row, "updated", df.format(u.getUpdated()));
+				table.put(row, "updated", this.dateFormatFactory.get().format(u.getUpdated()));
 				table.put(row, "key", u.getKey());
 				table.put(row, "value", u.getValue());
 			}
@@ -79,6 +79,15 @@ public class UpdateServlet extends HttpServlet {
 		}
 	}
 
+	private final ThreadLocal<DateFormat> dateFormatFactory = new ThreadLocal<DateFormat>() {
+		@Override
+		protected DateFormat initialValue () {
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			df.setTimeZone(TimeZone.getTimeZone("UTC"));
+			return df;
+		}
+	};
+
 	private static String arrToString (String[] arr) {
 		if (arr == null) return "null";
 		if (arr.length < 1) return "";
@@ -89,4 +98,5 @@ public class UpdateServlet extends HttpServlet {
 		}
 		return ret.toString();
 	}
+
 }
