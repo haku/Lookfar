@@ -13,7 +13,7 @@ public class EchoServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 7474120519103213760L;
 
-	public static final String CONTEXT = "/echo";
+	public static final String CONTEXT = "/echo/*";
 
 	@Override
 	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
