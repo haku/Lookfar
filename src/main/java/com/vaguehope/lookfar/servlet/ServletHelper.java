@@ -63,5 +63,20 @@ public final class ServletHelper {
 		return reqPath.startsWith(ROOT_PATH) ? reqPath.substring(ROOT_PATH.length()) : reqPath;
 	}
 
+	public static String extractPathElement (HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		String pathInfo = req.getPathInfo();
+		if (pathInfo == null || pathInfo.length() < 2) {
+			ServletHelper.error(resp, HttpServletResponse.SC_BAD_REQUEST, "No element specified.");
+			return null;
+		}
+		int x = pathInfo.indexOf('/', 1);
+		String element = x > 0 ? pathInfo.substring(1, x) : pathInfo.substring(1);
+		if (element.length() < 1) {
+			ServletHelper.error(resp, HttpServletResponse.SC_BAD_REQUEST, "No element found.");
+			return null;
+		}
+		return element;
+	}
+
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
