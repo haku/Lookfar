@@ -1,9 +1,62 @@
 == Database Create ==
-<pre>
-create table nodes (node VARCHAR(16), updated TIMESTAMP, pass VARCHAR(96));
-create table updates (node VARCHAR(16), updated TIMESTAMP, key VARCHAR(255), value VARCHAR(255));
-</pre>
+
+<code>create table nodes (node VARCHAR(16), updated TIMESTAMP, pass VARCHAR(96));<br>
+create table updates (node VARCHAR(16), updated TIMESTAMP, key VARCHAR(255), value VARCHAR(255));</code>
 
 === References ===
+
 * http://www.postgresql.org/docs/9.1/static/sql-createtable.html
 * http://www.postgresql.org/docs/9.1/static/datatype.html
+
+== Nodes ==
+
+List nodes:<br>
+<code><nowiki>curl -u "user_name:shared_password" https://lookfar.herokuapp.com/node</nowiki></code>
+
+Create a node or reset a node's password:<br>
+<code><nowiki>curl -u "user_name:shared_password" -X PUT https://lookfar.herokuapp.com/node/exampleNode</nowiki></code>
+
+Delete a node:<br>
+<code><nowiki>curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode</nowiki></code>
+
+== Updates ==
+
+List all updates:<br>
+<code><nowiki>curl -u "user_name:shared_password" https://lookfar.herokuapp.com/update</nowiki></code>
+
+Write an update:<br>
+<code><nowiki>curl -u "exampleNode:node_password" -d "var1=123&var2=456" https://lookfar.herokuapp.com/update/exampleNode</nowiki></code>
+
+Delete an update: ''Not yet implemented.''<br>
+<code><nowiki>curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/update/exampleNode</nowiki></code>
+
+== Thresholds ==
+
+''Not yet implemented.''
+
+A rule is what the value should be.  Breaking the rule triggers a warning.
+
+=== Syntax ===
+
+{|
+!rule
+!description
+|-
+|<code>=="0"</code>
+|Treat value as a string and must equal a string.
+|-
+|<code><45<br>>45<br><=45<br>>=45</code>
+|Treat value as a number and compare to a number.
+|-
+|<code><nowiki>=~[0 ]</nowiki></code>
+|Treat value as a string and must match a regular expression.
+|}
+
+=== Setting ===
+
+Set a threshold: ''Not yet implemented.''<br>
+<code><nowiki>curl -u "user_name:shared_password" -X PUT -d "var1=%3D%3D0" https://lookfar.herokuapp.com/update/exampleNode</nowiki></code>
+
+Clear a threshold: ''Not yet implemented.''<br>
+<code><nowiki>curl -u "user_name:shared_password" -X PUT -d "var1=null" https://lookfar.herokuapp.com/update/exampleNode</nowiki></code>
+
