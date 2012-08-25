@@ -22,7 +22,8 @@ import com.vaguehope.lookfar.reporter.JvmReporter;
 import com.vaguehope.lookfar.reporter.Reporter;
 import com.vaguehope.lookfar.servlet.EchoServlet;
 import com.vaguehope.lookfar.servlet.NodeServlet;
-import com.vaguehope.lookfar.servlet.UpdateServlet;
+import com.vaguehope.lookfar.servlet.UpdateGetServlet;
+import com.vaguehope.lookfar.servlet.UpdatePostServlet;
 
 public class Main {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -72,6 +73,7 @@ public class Main {
 		if (Modes.isSecure()) addFilter(generalServlets, new HerokoHttpsFilter());
 		addFilter(generalServlets, new BasicAuthFilter(new SharedPasswd()));
 		generalServlets.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
+		generalServlets.addServlet(new ServletHolder(new UpdateGetServlet(dataStore)), UpdateGetServlet.CONTEXT);
 		generalServlets.addServlet(new ServletHolder(new NodeServlet(dataStore)), NodeServlet.CONTEXT);
 		return generalServlets;
 	}
@@ -81,7 +83,7 @@ public class Main {
 		nodeServlets.setContextPath("/");
 		if (Modes.isSecure()) addFilter(nodeServlets, new HerokoHttpsFilter());
 		addFilter(nodeServlets, new BasicAuthFilter(new NodePasswd(dataStore)));
-		nodeServlets.addServlet(new ServletHolder(new UpdateServlet(dataStore)), UpdateServlet.CONTEXT);
+		nodeServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore)), UpdatePostServlet.CONTEXT);
 		return nodeServlets;
 	}
 
