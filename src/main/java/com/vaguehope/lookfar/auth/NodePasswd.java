@@ -23,7 +23,7 @@ public class NodePasswd implements PasswdChecker {
 		try {
 			String nodeName = ServletHelper.extractPathElement(req);
 			if (nodeName == null || !nodeName.equals(user)) return false;
-			String hashpw = this.dataStore.getNodeHashpw(nodeName);
+			String hashpw = this.dataStore.getNodeHashpw(nodeName); // TODO Guava Cache this.
 			if (hashpw == null) return false;
 			return BCrypt.checkpw(pass, hashpw);
 		}

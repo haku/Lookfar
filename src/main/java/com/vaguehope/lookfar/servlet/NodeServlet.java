@@ -75,4 +75,6 @@ public class NodeServlet extends HttpServlet {
 		AsciiTable.printTable(table, new String[] { "node", "pw" }, resp);
 	}
 
+	// TODO add doDelete().
+
 }
