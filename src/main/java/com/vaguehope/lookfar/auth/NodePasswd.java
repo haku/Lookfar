@@ -22,7 +22,7 @@ public class NodePasswd implements PasswdChecker {
 	public NodePasswd (DataStore dataStore) {
 		// FIXME Move cache to DataStore so entries expire when modified.
 		this.paswdCache = CacheBuilder.newBuilder()
-				.expireAfterWrite(10, TimeUnit.MINUTES)
+				.expireAfterWrite(1, TimeUnit.MINUTES)
 				.maximumSize(500)
 				.build(new PasswdLoader(dataStore));
 	}
