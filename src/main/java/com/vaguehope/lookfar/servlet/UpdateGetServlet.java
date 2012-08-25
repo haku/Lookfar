@@ -20,7 +20,7 @@ import com.vaguehope.lookfar.util.DateFormatFactory;
 
 public class UpdateGetServlet extends HttpServlet {
 
-	public static final String CONTEXT = "/update";
+	public static final String CONTEXT = "/update/*";
 
 	private static final long serialVersionUID = -1999920374623838318L;
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateGetServlet.class);
