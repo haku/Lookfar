@@ -75,6 +75,22 @@ public class NodeServlet extends HttpServlet {
 		AsciiTable.printTable(table, new String[] { "node", "pw" }, resp);
 	}
 
-	// TODO add doDelete().
+	@Override
+	protected void doDelete (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String nodeName = ServletHelper.extractPathElement(req, resp);
+		if (nodeName == null) return;
+
+		try {
+			if (this.dataStore.deleteNode(nodeName) < 1) {
+				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to delete node with name '" + nodeName + "'.");
+				return;
+			}
+		}
+		catch (SQLException e) {
+			LOG.warn("Failed to delete node.", e);
+			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete node: " + e.getMessage());
+			return;
+		}
+	}
 
 }

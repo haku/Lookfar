@@ -122,6 +122,17 @@ public class DataStore {
 		}
 	}
 
+	public int deleteNode (String nodeName) throws SQLException {
+		PreparedStatement st = this.conn.prepareStatement("DELETE FROM nodes WHERE node=?");
+		try {
+			st.setString(1, nodeName);
+			return st.executeUpdate();
+		}
+		finally {
+			st.close();
+		}
+	}
+
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	public List<Update> getAllUpdates () throws SQLException {
