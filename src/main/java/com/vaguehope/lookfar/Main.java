@@ -25,7 +25,7 @@ import com.vaguehope.lookfar.servlet.NodeServlet;
 import com.vaguehope.lookfar.servlet.UpdateGetServlet;
 import com.vaguehope.lookfar.servlet.UpdatePostServlet;
 
-public class Main {
+public final class Main {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	private static final Logger LOG = LoggerFactory.getLogger(Main.class);
@@ -36,7 +36,7 @@ public class Main {
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	public Main () throws Exception { // NOSONAR Exception is throw by Server.start().
+	private Main () throws Exception { // NOSONAR Exception is throw by Server.start().
 		// Reporting.
 		Reporter reporter = new Reporter(new JvmReporter());
 		reporter.start();
@@ -87,7 +87,7 @@ public class Main {
 		return nodeServlets;
 	}
 
-	public ResourceHandler createStaticFilesHandler () {
+	private static ResourceHandler createStaticFilesHandler () {
 		ResourceHandler resourceHandler = new ResourceHandler();
 		resourceHandler.setDirectoriesListed(false);
 		resourceHandler.setWelcomeFiles(new String[] { "index.html" });

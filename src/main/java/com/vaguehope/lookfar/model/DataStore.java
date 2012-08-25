@@ -9,8 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -159,7 +159,7 @@ public class DataStore {
 		}
 	}
 
-	public void update (String node, HashMap<String, String> data) throws SQLException {
+	public void update (String node, Map<String, String> data) throws SQLException {
 		PreparedStatement stUpdate = this.conn.prepareStatement("UPDATE updates SET value=?, updated=now() WHERE node=? AND key=?");
 		try {
 			for (Entry<String, String> datum : data.entrySet()) {

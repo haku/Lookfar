@@ -41,7 +41,7 @@ public final class PasswdGen {
 	private final SecureRandom sr;
 	private final AtomicLong lastSeed = new AtomicLong();
 
-	PasswdGen () {
+	protected PasswdGen () {
 		this.sr = getSr();
 		this.sr.nextBytes(new byte[INIT_SIZE_BYTES]);
 		LOG.info("SecureRandom provider: {}", this.sr.getProvider());

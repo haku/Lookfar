@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class DateFormatFactory extends ThreadLocal<DateFormat> {
+public final class DateFormatFactory extends ThreadLocal<DateFormat> {
 
 	private static final DateFormatFactory INSTANCE = new DateFormatFactory();
 

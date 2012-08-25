@@ -60,7 +60,7 @@ public class BasicAuthFilter implements Filter {
 		// Verify password.
 		authHeader64 = authHeader64.substring(Http.HEADER_AUTHORISATION_PREFIX.length());
 		String authHeader = B64Code.decode(authHeader64, null);
-		int x = authHeader.indexOf(":");
+		int x = authHeader.indexOf(':');
 		String user = authHeader.substring(0, x);
 		String pass = authHeader.substring(x + 1);
 		if (user == null || pass == null || user.isEmpty() || pass.isEmpty() || !this.passwdChecker.verifyPasswd(req, user, pass)) {
