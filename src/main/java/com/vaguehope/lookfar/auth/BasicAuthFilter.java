@@ -63,19 +63,13 @@ public class BasicAuthFilter implements Filter {
 		int x = authHeader.indexOf(":");
 		String user = authHeader.substring(0, x);
 		String pass = authHeader.substring(x + 1);
-		if (user == null || pass == null || user.isEmpty() || pass.isEmpty() || !checkUser(user, pass)) {
+		if (user == null || pass == null || user.isEmpty() || pass.isEmpty() || !this.passwdChecker.verifyPasswd(req, user, pass)) {
 			LOG.info("Auth failed: for={} uri={} user={} pass={}", new Object[] { req.getHeader("X-Forwarded-For"), req.getRequestURI(), user, pass });
 			send401(resp);
 			return;
 		}
 
 		chain.doFilter(request, response);
-	}
-
-//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	private boolean checkUser (@SuppressWarnings("unused") String user, String pass) {
-		return this.passwdChecker.verifyPasswd(pass);
 	}
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
