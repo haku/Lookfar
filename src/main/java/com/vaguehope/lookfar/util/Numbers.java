@@ -1,9 +1,11 @@
 package com.vaguehope.lookfar.util;
 
 public final class Numbers {
-	
-	private Numbers () {/* Static helper. */}
-	
+
+	private Numbers () {
+		throw new AssertionError();
+	}
+
 	public static boolean isNumeric (String str) {
 		if (!Character.isDigit(str.charAt(0)) && str.charAt(0) != '-') return false;
 		for (char c : str.substring(1).toCharArray()) {
@@ -11,5 +13,5 @@ public final class Numbers {
 		}
 		return true;
 	}
-	
+
 }

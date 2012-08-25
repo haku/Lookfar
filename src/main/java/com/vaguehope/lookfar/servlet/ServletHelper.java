@@ -17,7 +17,9 @@ public final class ServletHelper {
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	private ServletHelper () {/* Static helper */}
+	private ServletHelper () {
+		throw new AssertionError();
+	}
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

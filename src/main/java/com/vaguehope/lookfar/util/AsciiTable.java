@@ -15,7 +15,9 @@ public final class AsciiTable {
 
 	private static final String COLUMN_SEPARATOR = " | ";
 
-	private AsciiTable () {}
+	private AsciiTable () {
+		throw new AssertionError();
+	}
 
 	public static <R, C, V> void printTable (Table<R, C, V> table, C[] columnOrder, HttpServletResponse resp) throws IOException {
 		resp.setContentType(ServletHelper.CONTENT_TYPE_HTML);

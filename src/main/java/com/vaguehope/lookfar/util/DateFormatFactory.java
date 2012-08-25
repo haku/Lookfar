@@ -9,6 +9,8 @@ public class DateFormatFactory extends ThreadLocal<DateFormat> {
 
 	private static final DateFormatFactory INSTANCE = new DateFormatFactory();
 
+	private DateFormatFactory () {}
+
 	public static DateFormat getInstance () {
 		return INSTANCE.get();
 	}
@@ -23,6 +25,5 @@ public class DateFormatFactory extends ThreadLocal<DateFormat> {
 		df.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return df;
 	}
-
 
 }
