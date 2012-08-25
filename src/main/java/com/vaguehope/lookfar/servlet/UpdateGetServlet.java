@@ -42,8 +42,9 @@ public class UpdateGetServlet extends HttpServlet {
 				table.put(row, "updated", DateFormatFactory.format(u.getUpdated()));
 				table.put(row, "key", u.getKey());
 				table.put(row, "value", u.getValue());
+				table.put(row, "flag", u.calculateFlag().toString());
 			}
-			AsciiTable.printTable(table, new String[] { "node", "updated", "key", "value" }, resp);
+			AsciiTable.printTable(table, new String[] { "node", "updated", "key", "value", "flag" }, resp);
 		}
 		catch (SQLException e) {
 			LOG.warn("Failed to read data from store.", e);

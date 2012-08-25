@@ -3,6 +3,7 @@ package com.vaguehope.lookfar.model;
 import java.util.Date;
 
 import com.google.common.base.Objects;
+import com.vaguehope.lookfar.Config;
 
 public class Update {
 
@@ -32,6 +33,14 @@ public class Update {
 
 	public String getValue () {
 		return this.value;
+	}
+
+	public UpdateFlag calculateFlag () {
+		if (this.updated == null || System.currentTimeMillis() - this.updated.getTime() > Config.UPDATE_DEFAULT_EXPIRY_AGE_MILLIS) {
+			return UpdateFlag.EXPIRED;
+		}
+		// TODO check threshold.
+		return UpdateFlag.OK;
 	}
 
 	@Override
