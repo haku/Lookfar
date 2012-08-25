@@ -1,8 +1,6 @@
 package com.vaguehope.lookfar.servlet;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
@@ -16,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import com.vaguehope.lookfar.auth.PasswdGen;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.Node;
 import com.vaguehope.lookfar.util.AsciiTable;
@@ -57,7 +56,7 @@ public class NodeServlet extends HttpServlet {
 		String nodeName = ServletHelper.extractPathElement(req, resp);
 		if (nodeName == null) return;
 
-		String pw = new BigInteger(130, new SecureRandom()).toString(32);
+		String pw = PasswdGen.makePasswd();
 		String hashpw = BCrypt.hashpw(pw, BCrypt.gensalt());
 
 		try {
