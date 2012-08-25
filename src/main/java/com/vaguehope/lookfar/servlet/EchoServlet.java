@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.vaguehope.lookfar.util.Http;
+
 public class EchoServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 7474120519103213760L;
@@ -17,7 +19,7 @@ public class EchoServlet extends HttpServlet {
 
 	@Override
 	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.setContentType(ServletHelper.CONTENT_TYPE_PLAIN);
+		resp.setContentType(Http.CONTENT_TYPE_PLAIN);
 		PrintWriter w = resp.getWriter();
 
 		w.println("Protocol=" + req.getProtocol());

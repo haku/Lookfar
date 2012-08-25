@@ -76,7 +76,9 @@ public class BasicAuthFilter implements Filter {
 
 	private static void send401 (HttpServletResponse resp) throws IOException {
 		resp.setHeader(Http.WWW_AUTHENTICATE, Http.BASIC_REALM);
-		resp.sendError(javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+		resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		resp.setContentType(Http.CONTENT_TYPE_PLAIN);
+		resp.getWriter().println("401 Unauthorized.");
 	}
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

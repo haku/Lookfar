@@ -8,12 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.vaguehope.lookfar.util.Http;
+
 public final class ServletHelper {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	public static final String ROOT_PATH = "/";
-	public static final String CONTENT_TYPE_PLAIN = "text/plain;charset=UTF-8";
-	public static final String CONTENT_TYPE_HTML = "text/html;charset=UTF-8";
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -49,7 +49,7 @@ public final class ServletHelper {
 	public static void error (HttpServletResponse resp, int status, String msg) throws IOException {
 		resp.reset();
 		resp.setStatus(status);
-		resp.setContentType("text/plain");
+		resp.setContentType(Http.CONTENT_TYPE_PLAIN);
 		resp.getWriter().println("HTTP Error " + status + ": " + msg);
 	}
 

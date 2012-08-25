@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
-import com.vaguehope.lookfar.servlet.ServletHelper;
 
 public final class AsciiTable {
 
@@ -20,7 +19,7 @@ public final class AsciiTable {
 	}
 
 	public static <R, C, V> void printTable (Table<R, C, V> table, C[] columnOrder, HttpServletResponse resp) throws IOException {
-		resp.setContentType(ServletHelper.CONTENT_TYPE_HTML);
+		resp.setContentType(Http.CONTENT_TYPE_HTML);
 		PrintWriter w = resp.getWriter();
 		w.println("<!DOCTYPE html><html><body><pre>");
 		printTable(table, columnOrder, w);
