@@ -48,7 +48,83 @@ public class DataStore {
 		return conn;
 	}
 
-	public List<Update> readAllUpdates () throws SQLException {
+//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	public List<Node> getAllNodes () throws SQLException {
+		List<Node> ret = Lists.newArrayList();
+		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated FROM nodes ORDER BY node");
+		try {
+			ResultSet rs = st.executeQuery();
+			try {
+				while (rs.next()) {
+					String node = rs.getString(1);
+					Date updated = timestampToDate(rs.getTimestamp(2));
+					ret.add(new Node(node, updated));
+				}
+				return ret;
+			}
+			finally {
+				rs.close();
+			}
+		}
+		finally {
+			st.close();
+		}
+	}
+
+	public String getNodeHashpw (String nodeName) throws SQLException {
+		PreparedStatement st = this.conn.prepareStatement("SELECT pass FROM nodes WHERE node=?");
+		try {
+			st.setString(1, nodeName);
+			ResultSet rs = st.executeQuery();
+			try {
+				while (rs.next()) {
+					return rs.getString(1);
+				}
+				return null;
+			}
+			finally {
+				rs.close();
+			}
+		}
+		finally {
+			st.close();
+		}
+	}
+
+	public void putNode (String nodeName, String hashpw) throws SQLException {
+		PreparedStatement st = this.conn.prepareStatement("UPDATE nodes SET pass=?, updated=now() WHERE node=?");
+		try {
+			st.setString(1, hashpw);
+			st.setString(2, nodeName);
+			int rowsUpdates = st.executeUpdate();
+			if (rowsUpdates < 1) { // FIXME race condition.
+				insertNode(nodeName, hashpw);
+			}
+		}
+		finally {
+			st.close();
+		}
+	}
+
+	public void insertNode (String nodeName, String hashpw) throws SQLException {
+		PreparedStatement st = this.conn.prepareStatement("INSERT INTO nodes (node, updated, pass) VALUES (?, now(), ?)");
+		try {
+			st.setString(1, nodeName);
+			st.setString(2, hashpw);
+			int rowInserted = st.executeUpdate();
+			if (rowInserted < 1) {
+				throw new SQLException("Failed to insert into nodes table.  " + rowInserted + " rows updated.");
+			}
+		}
+		finally {
+			st.close();
+		}
+	}
+
+//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	public List<Update> getAllUpdates () throws SQLException {
 		List<Update> ret = Lists.newArrayList();
 		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value FROM updates ORDER BY node, key");
 		try {

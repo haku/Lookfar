@@ -15,11 +15,13 @@ import org.slf4j.LoggerFactory;
 
 import com.vaguehope.lookfar.auth.BasicAuthFilter;
 import com.vaguehope.lookfar.auth.HerokoHttpsFilter;
+import com.vaguehope.lookfar.auth.NodePasswd;
 import com.vaguehope.lookfar.auth.SharedPasswd;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.reporter.JvmReporter;
 import com.vaguehope.lookfar.reporter.Reporter;
 import com.vaguehope.lookfar.servlet.EchoServlet;
+import com.vaguehope.lookfar.servlet.NodeServlet;
 import com.vaguehope.lookfar.servlet.UpdateServlet;
 
 public class Main {
@@ -41,15 +43,49 @@ public class Main {
 		// Database.
 		DataStore dataStore = new DataStore();
 
-		// Servlet container.
-		ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		servletHandler.setContextPath("/");
-
 		// Servlets.
-		servletHandler.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
-		servletHandler.addServlet(new ServletHolder(new UpdateServlet(dataStore)), UpdateServlet.CONTEXT);
+		ServletContextHandler generalServlets = createGeneralServlets(dataStore);
+		ServletContextHandler nodeServlets = createNodeServlets(dataStore);
 
 		// Static files on classpath.
+		ResourceHandler resourceHandler = createStaticFilesHandler();
+
+		// Top level handler.
+		HandlerList handler = new HandlerList();
+		handler.setHandlers(new Handler[] { resourceHandler, generalServlets, nodeServlets });
+
+		// Listening connector.
+		int port = Integer.parseInt(System.getenv("PORT")); // Heroko pattern.
+		SelectChannelConnector connector = createHttpConnector(port);
+
+		// Start server.
+		this.server = new Server();
+		this.server.setHandler(handler);
+		this.server.addConnector(connector);
+		this.server.start();
+		LOG.info("Server ready on port " + port + ".");
+	}
+
+	private static ServletContextHandler createGeneralServlets (DataStore dataStore) {
+		ServletContextHandler generalServlets = new ServletContextHandler();
+		generalServlets.setContextPath("/");
+		if (Modes.isSecure()) addFilter(generalServlets, new HerokoHttpsFilter());
+		addFilter(generalServlets, new BasicAuthFilter(new SharedPasswd()));
+		generalServlets.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
+		generalServlets.addServlet(new ServletHolder(new NodeServlet(dataStore)), NodeServlet.CONTEXT);
+		return generalServlets;
+	}
+
+	private static ServletContextHandler createNodeServlets (DataStore dataStore) {
+		ServletContextHandler nodeServlets = new ServletContextHandler();
+		nodeServlets.setContextPath("/");
+		if (Modes.isSecure()) addFilter(nodeServlets, new HerokoHttpsFilter());
+		addFilter(nodeServlets, new BasicAuthFilter(new NodePasswd(dataStore)));
+		nodeServlets.addServlet(new ServletHolder(new UpdateServlet(dataStore)), UpdateServlet.CONTEXT);
+		return nodeServlets;
+	}
+
+	public ResourceHandler createStaticFilesHandler () {
 		ResourceHandler resourceHandler = new ResourceHandler();
 		resourceHandler.setDirectoriesListed(false);
 		resourceHandler.setWelcomeFiles(new String[] { "index.html" });
@@ -58,41 +94,26 @@ public class Main {
 						"./src/main/resources/webroot" :
 						Main.class.getResource("/webroot").toExternalForm()
 				);
+		return resourceHandler;
+	}
 
-		// Filters to control access.
-		if (Modes.isSecure()) {
-			addFilter(servletHandler, new HerokoHttpsFilter());
-		}
-		addFilter(servletHandler, new BasicAuthFilter(new SharedPasswd()));
-
-		// Prepare final handler.
-		HandlerList handler = new HandlerList();
-		handler.setHandlers(new Handler[] { resourceHandler, servletHandler });
-
-		// Listening connector.
-		String portString = System.getenv("PORT"); // Heroko pattern.
+	private static SelectChannelConnector createHttpConnector (int port) {
 		SelectChannelConnector connector = new SelectChannelConnector();
 		connector.setMaxIdleTime(Config.SERVER_MAX_IDLE_TIME_MS);
 		connector.setAcceptors(Config.SERVER_ACCEPTORS);
 		connector.setStatsOn(false);
 		connector.setLowResourcesConnections(Config.SERVER_LOW_RESOURCES_CONNECTIONS);
 		connector.setLowResourcesMaxIdleTime(Config.SERVER_LOW_RESOURCES_MAX_IDLE_TIME_MS);
-		connector.setPort(Integer.parseInt(portString));
-
-		// Start server.
-		this.server = new Server();
-		this.server.setHandler(handler);
-		this.server.addConnector(connector);
-		this.server.start();
-		LOG.info("Server ready on port " + portString + ".");
+		connector.setPort(port);
+		return connector;
 	}
 
-	public void addFilter (ServletContextHandler handler, Filter httpsFilter) {
+	private static void addFilter (ServletContextHandler handler, Filter httpsFilter) {
 		FilterHolder holder = new FilterHolder(httpsFilter);
 		handler.addFilter(holder, "/*", null);
 	}
 
-	public void join () throws InterruptedException {
+	private void join () throws InterruptedException {
 		this.server.join();
 	}
 

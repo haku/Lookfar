@@ -1,15 +1,9 @@
 package com.vaguehope.lookfar.servlet;
 
-import static com.vaguehope.lookfar.servlet.ServletHelper.validateStringParam;
-
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TimeZone;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -25,14 +19,14 @@ import com.google.common.collect.TreeBasedTable;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.Update;
 import com.vaguehope.lookfar.util.AsciiTable;
+import com.vaguehope.lookfar.util.DateFormatFactory;
 
 public class UpdateServlet extends HttpServlet {
 
-	public static final String CONTEXT = "/update";
+	public static final String CONTEXT = "/update/*";
 
 	private static final long serialVersionUID = 1157053289236694746L;
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateServlet.class);
-	private static final String PARAM_NODE = "node";
 
 	private final DataStore dataStore;
 
@@ -45,10 +39,10 @@ public class UpdateServlet extends HttpServlet {
 		Table<Integer, String, String> table = TreeBasedTable.create();
 		try {
 			int i = 0;
-			for (Update u : this.dataStore.readAllUpdates()) {
+			for (Update u : this.dataStore.getAllUpdates()) {
 				Integer row = Integer.valueOf(i++);
 				table.put(row, "node", u.getNode());
-				table.put(row, "updated", this.dateFormatFactory.get().format(u.getUpdated()));
+				table.put(row, "updated", DateFormatFactory.format(u.getUpdated()));
 				table.put(row, "key", u.getKey());
 				table.put(row, "value", u.getValue());
 			}
@@ -62,12 +56,11 @@ public class UpdateServlet extends HttpServlet {
 
 	@Override
 	protected void doPost (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String node = validateStringParam(req, resp, PARAM_NODE);
+		String node = ServletHelper.extractPathElement(req, resp);
 		if (node == null) return;
 
 		HashMap<String, String> data = Maps.newHashMap();
-		for (Entry<String, String[]> datum : ((Map<String, String[]>) req.getParameterMap()).entrySet()) {
-			if (PARAM_NODE.equals(datum.getKey())) continue;
+		for (Entry<String, String[]> datum : req.getParameterMap().entrySet()) {
 			data.put(datum.getKey(), arrToString(datum.getValue()));
 		}
 		try {
@@ -78,15 +71,6 @@ public class UpdateServlet extends HttpServlet {
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to store data: " + e.getMessage());
 		}
 	}
-
-	private final ThreadLocal<DateFormat> dateFormatFactory = new ThreadLocal<DateFormat>() {
-		@Override
-		protected DateFormat initialValue () {
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			df.setTimeZone(TimeZone.getTimeZone("UTC"));
-			return df;
-		}
-	};
 
 	private static String arrToString (String[] arr) {
 		if (arr == null) return "null";
