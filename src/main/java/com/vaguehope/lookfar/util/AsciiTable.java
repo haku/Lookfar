@@ -29,7 +29,7 @@ public final class AsciiTable {
 
 	public static <R, C, V> void printTable (Table<R, C, V> table, C[] columnOrder, PrintWriter w) {
 		int rowKeyWidth = findRowKeyWidest(table);
-		Map<C, Integer> colWidths = measureColumnWidths(table);
+		Map<C, Integer> colWidths = measureColumnWidths(table, columnOrder);
 		printHeader(columnOrder, rowKeyWidth, colWidths, w);
 
 		printRows(table, columnOrder, rowKeyWidth, colWidths, w);
@@ -43,14 +43,21 @@ public final class AsciiTable {
 		return rowKeyWidth;
 	}
 
-	private static <R, C, V> Map<C, Integer> measureColumnWidths (Table<R, C, V> table) {
-		final Map<C, Integer> colWidths = Maps.newHashMap();
-		for (Entry<C, Map<R, V>> column : table.columnMap().entrySet()) {
-			int width = column.getKey().toString().length();
-			for (V cell : column.getValue().values()) {
-				width = Math.max(width, cell.toString().length());
+	private static <R, C, V> Map<C, Integer> measureColumnWidths (Table<R, C, V> table, C[] columnNames) {
+		Map<C, Integer> colWidths = Maps.newHashMap();
+		if (table.size() > 0) {
+			for (Entry<C, Map<R, V>> column : table.columnMap().entrySet()) {
+				int width = column.getKey().toString().length();
+				for (V cell : column.getValue().values()) {
+					width = Math.max(width, cell.toString().length());
+				}
+				colWidths.put(column.getKey(), Integer.valueOf(width));
 			}
-			colWidths.put(column.getKey(), Integer.valueOf(width));
+		}
+		else {
+			for (C col : columnNames) {
+				colWidths.put(col, Integer.valueOf(col.toString().length()));
+			}
 		}
 		return colWidths;
 	}
