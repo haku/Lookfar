@@ -21,6 +21,8 @@ import com.vaguehope.lookfar.Modes;
 
 /**
  * http://jdbc.postgresql.org/documentation/91/index.html
+ * http://www.postgresql.org/docs/9.1/static/sql-createtable.html
+ * http://www.postgresql.org/docs/9.1/static/datatype.html
  */
 public class DataStore {
 
