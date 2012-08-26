@@ -23,6 +23,7 @@ public class EchoServlet extends HttpServlet {
 		PrintWriter w = resp.getWriter();
 
 		w.println("Protocol=" + req.getProtocol());
+		w.println("Secure=" + req.isSecure());
 		w.println("Scheme=" + req.getScheme());
 		w.println("Method=" + req.getMethod());
 		w.println("RequestURI=" + req.getRequestURI());
