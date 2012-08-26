@@ -30,9 +30,20 @@ Write an update:<br>
 Delete an update: ''Not yet implemented.''<br>
 <code><nowiki>curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/update/exampleNode</nowiki></code>
 
-== Thresholds ==
+== Expire periods ==
 
-''Not yet implemented.''
+Setting custom expire times using strings like <code>1m</code>, <code>2h</code>, <code>3d</code>.
+
+=== Setting ===
+
+Set a custom period: ''Not yet implemented.''<br>
+<code><nowiki>curl -u "user_name:shared_password" -d "var1=1h" https://lookfar.herokuapp.com/update_expire/exampleNode</nowiki></code>
+
+Clear a custom period: ''Not yet implemented.''<br>
+<code><nowiki>curl -u "user_name:shared_password" -d "var1=null" https://lookfar.herokuapp.com/update_expire/exampleNode</nowiki></code>
+
+
+== Thresholds ==
 
 A rule is what the value should be.  Breaking the rule triggers a warning.
 
@@ -55,8 +66,21 @@ A rule is what the value should be.  Breaking the rule triggers a warning.
 === Setting ===
 
 Set a threshold: ''Not yet implemented.''<br>
-<code><nowiki>curl -u "user_name:shared_password" -X PUT -d "var1=%3D%3D0" https://lookfar.herokuapp.com/update/exampleNode</nowiki></code>
+<code><nowiki>curl -u "user_name:shared_password" -d "var1=%3D%3D0" https://lookfar.herokuapp.com/update_threshold/exampleNode</nowiki></code>
 
 Clear a threshold: ''Not yet implemented.''<br>
-<code><nowiki>curl -u "user_name:shared_password" -X PUT -d "var1=null" https://lookfar.herokuapp.com/update/exampleNode</nowiki></code>
+<code><nowiki>curl -u "user_name:shared_password" -d "var1=null" DELETE https://lookfar.herokuapp.com/update_threshold/exampleNode</nowiki></code>
 
+== Summary of context paths ==
+
+<pre>
+   GET /
+   GET /node
+   PUT /node/*
+DELETE /node/*
+   GET /update
+  POST /update/*
+DELETE /update/*
+  POST /update_expire/*
+  POST /update_threshold/*
+</pre>
