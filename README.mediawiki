@@ -74,13 +74,20 @@ Clear a threshold: ''Not yet implemented.''<br>
 == Summary of context paths ==
 
 <pre>
-   GET /
-   GET /node
-   PUT /node/*
-DELETE /node/*
-   GET /update
-  POST /update/*
-DELETE /update/*
-  POST /update_expire/*
-  POST /update_threshold/*
+A = Admin
+U = User
+N = Node
+
+U    GET /
+A    GET /user
+A    PUT /user/*
+A DELETE /user/*
+U    GET /node
+U    PUT /node/*
+U DELETE /node/*
+U    GET /update
+N   POST /update/*
+U DELETE /update/*
+U   POST /update_expire/*
+U   POST /update_threshold/*
 </pre>
