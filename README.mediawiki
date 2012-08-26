@@ -62,7 +62,7 @@ A rule is what the value should be.  Breaking the rule triggers a warning.
 !rule
 !description
 |-
-|<code>=="0"</code>
+|<code>==0</code>
 |Treat value as a string and must equal a string.
 |-
 |<code><45<br>>45<br><=45<br>>=45</code>
