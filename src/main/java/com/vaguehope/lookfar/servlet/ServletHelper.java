@@ -88,7 +88,7 @@ public final class ServletHelper {
 		int x = (n == 0 ? 0 : nthOccurrence(path, '/', n - 1));
 		String element;
 		if (x >= 0) {
-			int y = nthOccurrence(path, '/', n);
+			int y = path.indexOf('/', x + 1);
 			if (y > x) {
 				element = path.substring(n == 0 ? 0 : x + 1, y);
 			}
