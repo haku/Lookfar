@@ -31,7 +31,7 @@ Delete a node:<br>
 List all updates:<br>
 <code><nowiki>curl -u "user_name:shared_password" https://lookfar.herokuapp.com/update</nowiki></code>
 
-Delete an update: ''Not yet implemented.''<br>
+Delete an update:<br>
 <code><nowiki>curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1</nowiki></code>
 
 === Pushing ===
@@ -50,7 +50,6 @@ Set a custom period: ''Not yet implemented.''<br>
 
 Clear a custom period (reverts to default): ''Not yet implemented.''<br>
 <code><nowiki>curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1/expire</nowiki></code>
-
 
 == Thresholds ==
 
@@ -74,10 +73,10 @@ A rule is what the value should be.  Breaking the rule triggers a warning.
 
 === Setting ===
 
-Set a threshold: ''Not yet implemented.''<br>
+Set a threshold:<br>
 <code><nowiki>curl -u "user_name:shared_password" -d "==0" https://lookfar.herokuapp.com/node/exampleNode/var1/threshold</nowiki></code>
 
-Clear a threshold: ''Not yet implemented.''<br>
+Clear a threshold:<br>
 <code><nowiki>curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1/threshold</nowiki></code>
 
 == Summary of context paths ==
