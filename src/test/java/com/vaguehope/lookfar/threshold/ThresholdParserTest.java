@@ -34,4 +34,11 @@ public class ThresholdParserTest {
 		assertEquals(ThresholdStatus.EXCEEDED, t.isValid("fail"));
 	}
 
+	@Test
+	public void itParsesRegexMatches () throws Exception {
+		Threshold t = this.undertest.parseThreshold("=~[0 ]+");
+		assertEquals(ThresholdStatus.OK, t.isValid("0 0"));
+		assertEquals(ThresholdStatus.EXCEEDED, t.isValid("0 1"));
+	}
+
 }

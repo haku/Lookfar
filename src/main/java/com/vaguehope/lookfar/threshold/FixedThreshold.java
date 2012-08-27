@@ -10,7 +10,6 @@ public enum FixedThreshold implements Threshold {
 
 	private FixedThreshold (ThresholdStatus thresholdStatus) {
 		this.thresholdStatus = thresholdStatus;
-
 	}
 
 	@Override

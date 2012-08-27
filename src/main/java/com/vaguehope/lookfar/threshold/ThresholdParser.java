@@ -9,14 +9,12 @@ import com.google.common.cache.LoadingCache;
 
 public class ThresholdParser {
 
-	private static final String STRING_EQUALS = "==";
-
 	private final LoadingCache<String, Threshold> cache;
 
 	public ThresholdParser () {
 		// TODO tweak cache parameters?
 		this.cache = CacheBuilder.newBuilder()
-				.maximumSize(1000)
+				.maximumSize(500)
 				.expireAfterAccess(1, TimeUnit.HOURS)
 				.build(new ThreasholdFactory());
 	}
@@ -37,8 +35,9 @@ public class ThresholdParser {
 
 		@Override
 		public Threshold load (String threshold) {
-			if (threshold.startsWith(STRING_EQUALS) && threshold.length() > STRING_EQUALS.length()) {
-				return new EqualsStringThreshold(threshold.substring(STRING_EQUALS.length()));
+			for (ThresholdTypes tt : ThresholdTypes.values()) {
+				Threshold t = tt.tryParse(threshold);
+				if (t != null) return t;
 			}
 			return FixedThreshold.INVALID;
 		}
