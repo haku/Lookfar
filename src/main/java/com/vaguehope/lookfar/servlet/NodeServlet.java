@@ -21,6 +21,7 @@ import com.vaguehope.lookfar.model.Update;
 import com.vaguehope.lookfar.model.UpdateHelper;
 import com.vaguehope.lookfar.util.AsciiTable;
 import com.vaguehope.lookfar.util.DateFormatFactory;
+import com.vaguehope.lookfar.util.ServletHelper;
 import com.vaguehope.lookfar.util.StringHelper;
 
 public class NodeServlet extends HttpServlet {

@@ -13,7 +13,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.vaguehope.lookfar.model.DataStore;
-import com.vaguehope.lookfar.servlet.ServletHelper;
+import com.vaguehope.lookfar.util.ServletHelper;
 
 public class NodePasswd implements PasswdChecker {
 

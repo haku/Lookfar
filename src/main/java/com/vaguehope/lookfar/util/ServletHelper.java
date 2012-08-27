@@ -1,4 +1,4 @@
-package com.vaguehope.lookfar.servlet;
+package com.vaguehope.lookfar.util;
 
 import static com.vaguehope.lookfar.util.Numbers.isNumeric;
 
@@ -7,9 +7,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import com.vaguehope.lookfar.util.Http;
-import com.vaguehope.lookfar.util.StringHelper;
 
 public final class ServletHelper {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

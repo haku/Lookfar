@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 import com.vaguehope.lookfar.model.DataStore;
+import com.vaguehope.lookfar.util.ServletHelper;
 
 public class UpdatePostServlet extends HttpServlet {
 

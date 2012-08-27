@@ -1,4 +1,4 @@
-package com.vaguehope.lookfar.servlet;
+package com.vaguehope.lookfar.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
+
+import com.vaguehope.lookfar.util.ServletHelper;
 
 public class ServletHelperTest {
 
