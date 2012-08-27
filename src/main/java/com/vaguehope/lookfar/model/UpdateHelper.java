@@ -12,6 +12,8 @@ import com.vaguehope.lookfar.util.DateFormatFactory;
 
 public final class UpdateHelper {
 
+	private static final String NULL_THRESHOLD = "-";
+
 	private UpdateHelper () {
 		throw new AssertionError();
 	}
@@ -25,7 +27,7 @@ public final class UpdateHelper {
 			table.put(row, "updated", DateFormatFactory.format(u.getUpdated()));
 			table.put(row, "key", String.valueOf(u.getKey()));
 			table.put(row, "value", String.valueOf(u.getValue()));
-			table.put(row, "threshold", String.valueOf(u.getThreshold()));
+			table.put(row, "threshold", u.getThreshold() == null ? NULL_THRESHOLD : u.getThreshold());
 			table.put(row, "flag", u.calculateFlag().toString());
 		}
 		AsciiTable.printTable(table, new String[] { "node", "updated", "key", "value", "threshold", "flag" }, resp);
