@@ -1,4 +1,4 @@
-package com.vaguehope.lookfar;
+package com.vaguehope.lookfar.config;
 
 import java.util.concurrent.TimeUnit;
 

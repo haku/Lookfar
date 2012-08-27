@@ -17,6 +17,8 @@ import com.vaguehope.lookfar.auth.BasicAuthFilter;
 import com.vaguehope.lookfar.auth.HerokoHttpsFilter;
 import com.vaguehope.lookfar.auth.NodePasswd;
 import com.vaguehope.lookfar.auth.SharedPasswd;
+import com.vaguehope.lookfar.config.Config;
+import com.vaguehope.lookfar.config.Modes;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.reporter.JvmReporter;
 import com.vaguehope.lookfar.reporter.Reporter;

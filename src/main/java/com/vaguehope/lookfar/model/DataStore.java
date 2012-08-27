@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.vaguehope.lookfar.Modes;
+import com.vaguehope.lookfar.config.Modes;
 
 /**
  * http://jdbc.postgresql.org/documentation/91/index.html

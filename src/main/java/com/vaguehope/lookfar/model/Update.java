@@ -3,7 +3,7 @@ package com.vaguehope.lookfar.model;
 import java.util.Date;
 
 import com.google.common.base.Objects;
-import com.vaguehope.lookfar.Config;
+import com.vaguehope.lookfar.config.Config;
 
 public class Update {
 
