@@ -28,9 +28,11 @@ public class DataStore {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DataStore.class);
 
+	private final UpdateFactory updateFactory;
 	private final Connection conn;
 
-	public DataStore () throws URISyntaxException, ClassNotFoundException, SQLException {
+	public DataStore (UpdateFactory updateFactory) throws URISyntaxException, ClassNotFoundException, SQLException {
+		this.updateFactory = updateFactory;
 		this.conn = getConnection();
 	}
 
@@ -199,13 +201,13 @@ public class DataStore {
 		}
 	}
 
-	private static Update readUpdate (ResultSet rs) throws SQLException {
+	private Update readUpdate (ResultSet rs) throws SQLException {
 		String node = rs.getString(1);
 		Date updated = timestampToDate(rs.getTimestamp(2));
 		String key = rs.getString(3);
 		String value = rs.getString(4);
 		String threshold = rs.getString(5);
-		return new Update(node, updated, key, value, threshold);
+		return this.updateFactory.makeUpdate(node, updated, key, value, threshold);
 	}
 
 	public void update (String node, Map<String, String> data) throws SQLException {

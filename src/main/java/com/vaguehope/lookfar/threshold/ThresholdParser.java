@@ -22,7 +22,7 @@ public class ThresholdParser {
 	}
 
 	public Threshold parseThreshold (String threshold) {
-		if (threshold == null) return InvalidThreshold.INSTANCE;
+		if (threshold == null) return FixedThreshold.UNDEFINED;
 		try {
 			return this.cache.get(threshold);
 		}
@@ -38,9 +38,9 @@ public class ThresholdParser {
 		@Override
 		public Threshold load (String threshold) throws Exception {
 			if (threshold.startsWith(STRING_EQUALS) && threshold.length() > STRING_EQUALS.length()) {
-				return new EqualsStringThreshold(threshold.substring("==".length()));
+				return new EqualsStringThreshold(threshold.substring(STRING_EQUALS.length()));
 			}
-			return InvalidThreshold.INSTANCE;
+			return FixedThreshold.INVALID;
 		}
 
 	}

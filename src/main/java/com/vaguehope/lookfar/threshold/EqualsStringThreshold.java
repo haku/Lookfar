@@ -9,8 +9,8 @@ public class EqualsStringThreshold implements Threshold {
 	}
 
 	@Override
-	public boolean isValid (String value) {
-		return this.expectedValue.equals(value);
+	public ThresholdStatus isValid (String value) {
+		return this.expectedValue.equals(value) ? ThresholdStatus.OK : ThresholdStatus.EXCEEDED;
 	}
 
 }

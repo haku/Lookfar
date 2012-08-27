@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.google.common.base.Objects;
 import com.vaguehope.lookfar.config.Config;
+import com.vaguehope.lookfar.threshold.ThresholdStatus;
 
 public class Update {
 
@@ -12,13 +13,15 @@ public class Update {
 	private final String key;
 	private final String value;
 	private final String threshold;
+	private final ThresholdStatus thresholdStatus;
 
-	public Update (String node, Date updated, String key, String value, String threshold) {
+	public Update (String node, Date updated, String key, String value, String threshold, ThresholdStatus thresholdStatus) {
 		this.node = node;
 		this.updated = updated;
 		this.key = key;
 		this.value = value;
 		this.threshold = threshold;
+		this.thresholdStatus = thresholdStatus;
 	}
 
 	public String getNode () {
@@ -45,8 +48,7 @@ public class Update {
 		if (this.updated == null || System.currentTimeMillis() - this.updated.getTime() > Config.UPDATE_DEFAULT_EXPIRY_AGE_MILLIS) {
 			return UpdateFlag.EXPIRED;
 		}
-		// TODO check threshold.
-		return UpdateFlag.OK;
+		return UpdateFlag.fromThreshold(this.thresholdStatus);
 	}
 
 	@Override

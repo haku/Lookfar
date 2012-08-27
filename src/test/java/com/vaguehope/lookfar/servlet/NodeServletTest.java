@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.Node;
 import com.vaguehope.lookfar.model.Update;
+import com.vaguehope.lookfar.threshold.ThresholdStatus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NodeServletTest {
@@ -182,7 +183,7 @@ public class NodeServletTest {
 	}
 
 	private Update givenSingleNodeWithUpdate (String nodeName, String key, String value, String threshold) throws Exception {
-		Update update = new Update(nodeName, new Date(), key, value, threshold);
+		Update update = new Update(nodeName, new Date(), key, value, threshold, ThresholdStatus.OK);
 		when(this.dataStore.getUpdate(nodeName, key)).thenReturn(update);
 		when(this.dataStore.getUpdates(nodeName)).thenReturn(ImmutableList.of(update));
 		return update;

@@ -20,12 +20,14 @@ import com.vaguehope.lookfar.auth.SharedPasswd;
 import com.vaguehope.lookfar.config.Config;
 import com.vaguehope.lookfar.config.Modes;
 import com.vaguehope.lookfar.model.DataStore;
+import com.vaguehope.lookfar.model.UpdateFactory;
 import com.vaguehope.lookfar.reporter.JvmReporter;
 import com.vaguehope.lookfar.reporter.Reporter;
 import com.vaguehope.lookfar.servlet.EchoServlet;
 import com.vaguehope.lookfar.servlet.NodeServlet;
 import com.vaguehope.lookfar.servlet.UpdateGetServlet;
 import com.vaguehope.lookfar.servlet.UpdatePostServlet;
+import com.vaguehope.lookfar.threshold.ThresholdParser;
 
 public final class Main {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -43,8 +45,10 @@ public final class Main {
 		Reporter reporter = new Reporter(new JvmReporter());
 		reporter.start();
 
-		// Database.
-		DataStore dataStore = new DataStore();
+		// Model.
+		ThresholdParser thresholdParser = new ThresholdParser();
+		UpdateFactory updateFactory = new UpdateFactory(thresholdParser);
+		DataStore dataStore = new DataStore(updateFactory );
 
 		// Servlets.
 		ServletContextHandler generalServlets = createGeneralServlets(dataStore);
