@@ -36,7 +36,7 @@ public class ThresholdParser {
 		public ThreasholdFactory () {}
 
 		@Override
-		public Threshold load (String threshold) throws Exception {
+		public Threshold load (String threshold) {
 			if (threshold.startsWith(STRING_EQUALS) && threshold.length() > STRING_EQUALS.length()) {
 				return new EqualsStringThreshold(threshold.substring(STRING_EQUALS.length()));
 			}
