@@ -6,6 +6,7 @@ public enum UpdateFlag {
 
 	OK,
 	EXPIRED,
+	INVALID,
 	WARNING,
 	;
 
@@ -16,6 +17,8 @@ public enum UpdateFlag {
 				return OK;
 
 			case INVALID:
+				return INVALID;
+
 			case EXCEEDED:
 			default:
 				return WARNING;
