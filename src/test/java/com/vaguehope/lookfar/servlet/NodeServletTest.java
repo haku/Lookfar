@@ -154,6 +154,18 @@ public class NodeServletTest {
 		assertEquals(200, this.resp.getStatus());
 	}
 
+	@SuppressWarnings("boxing")
+	@Test
+	public void itDeletesThreshold () throws Exception {
+		this.req.setPathInfo("/my_node/some_key/threshold");
+		when(this.dataStore.setThreshold("my_node", "some_key", null)).thenReturn(1);
+
+		this.undertest.doDelete(this.req, this.resp);
+
+		verify(this.dataStore).setThreshold("my_node", "some_key", null);
+		assertEquals(200, this.resp.getStatus());
+	}
+
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	private List<Node> givenSomeNodes (int n) throws SQLException {

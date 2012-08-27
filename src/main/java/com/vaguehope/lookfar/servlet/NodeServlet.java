@@ -134,7 +134,17 @@ public class NodeServlet extends HttpServlet {
 			deleteNode(resp, nodeName);
 		}
 		else {
-			deleteKey(resp, nodeName, keyName);
+			String propName = ServletHelper.extractPathElement(req, 3);
+			if (propName == null) {
+				deleteKey(resp, nodeName, keyName);
+			}
+			else if ("threshold".equals(propName)) {
+				setThreshold(resp, nodeName, keyName, null);
+			}
+			else {
+				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Unknown property: " + propName + "'.");
+				return;
+			}
 		}
 
 	}
@@ -178,22 +188,26 @@ public class NodeServlet extends HttpServlet {
 		String propName = ServletHelper.extractPathElement(req, 3, resp);
 		if (propName == null) return;
 
+		if ("threshold".equals(propName)) {
+			String threshold = readerFirstLine(req, 255);
+			setThreshold(resp, nodeName, keyName, threshold);
+		}
+		else {
+			ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Unknown property: " + propName + "'.");
+			return;
+		}
+	}
+
+	public void setThreshold (HttpServletResponse resp, String nodeName, String keyName, String threshold) throws IOException {
 		try {
-			if ("threshold".equals(propName)) {
-				String threshold = readerFirstLine(req, 255);
-				if (this.dataStore.setThreshold(nodeName, keyName, threshold) < 1) {
-					ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to write threshold '" + threshold + "' for key '" + keyName + "' for node '" + nodeName + "'.");
-					return;
-				}
-			}
-			else {
-				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Unknown property: " + propName + "'.");
+			if (this.dataStore.setThreshold(nodeName, keyName, threshold) < 1) {
+				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to write threshold '" + threshold + "' for key '" + keyName + "' for node '" + nodeName + "'.");
 				return;
 			}
 		}
 		catch (SQLException e) {
-			LOG.warn("Failed to set property.", e);
-			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to set property: " + e.getMessage());
+			LOG.warn("Failed to set threshold.", e);
+			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to set threshold: " + e.getMessage());
 			return;
 		}
 	}
