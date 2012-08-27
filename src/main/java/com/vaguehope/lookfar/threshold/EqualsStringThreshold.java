@@ -13,7 +13,6 @@ public class EqualsStringThreshold implements Threshold {
 
 	private final String expectedValue;
 
-
 	public EqualsStringThreshold (String expectedValue) {
 		if (expectedValue == null || expectedValue.isEmpty()) throw new IllegalArgumentException();
 		this.expectedValue = expectedValue;
