@@ -41,4 +41,11 @@ public class ThresholdParserTest {
 		assertEquals(ThresholdStatus.EXCEEDED, t.isValid("0 1"));
 	}
 
+	@Test
+	public void itParsesNumberComparator () throws Exception {
+		Threshold t = this.undertest.parseThreshold("<50");
+		assertEquals(ThresholdStatus.OK, t.isValid("49"));
+		assertEquals(ThresholdStatus.EXCEEDED, t.isValid("55"));
+	}
+
 }

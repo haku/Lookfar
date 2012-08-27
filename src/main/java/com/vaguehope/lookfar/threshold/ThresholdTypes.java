@@ -14,6 +14,12 @@ public enum ThresholdTypes {
 			return MatchesRegexThreshold.tryParse(threshold);
 		}
 	},
+	NUMERIC {
+		@Override
+		public Threshold tryParse (String threshold) {
+			return NumberComparatorThreshold.tryParse(threshold);
+		}
+	},
 	;
 
 	public abstract Threshold tryParse (String threshold);
