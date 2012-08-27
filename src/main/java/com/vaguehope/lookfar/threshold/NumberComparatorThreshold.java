@@ -60,9 +60,8 @@ public class NumberComparatorThreshold implements Threshold {
 	public NumberComparatorThreshold (MathSymbol comparator, String argument) {
 		this.symbol = comparator;
 		if (argument == null || argument.isEmpty()) throw new IllegalArgumentException();
-		Integer argVal = Numbers.tryForceParse(argument);
-		if (argVal != null) {
-			this.argument = argVal;
+		if (Numbers.isNumeric(argument)) {
+			this.argument = Integer.valueOf(argument);
 		}
 		else {
 			this.argument = null;
