@@ -16,18 +16,6 @@ import org.junit.Test;
 public class ServletHelperTest {
 
 	@Test
-	public void itCanFindNthElement () throws Exception {
-		assertEquals(-1, ServletHelper.nthOccurrence("", '/', 0));
-		assertEquals(-1, ServletHelper.nthOccurrence("a", '/', 0));
-		assertEquals(0, ServletHelper.nthOccurrence("/", '/', 0));
-		assertEquals(1, ServletHelper.nthOccurrence("//", '/', 1));
-		assertEquals(1, ServletHelper.nthOccurrence("a/", '/', 0));
-		assertEquals(-1, ServletHelper.nthOccurrence("a/", '/', 1));
-		assertEquals(0, ServletHelper.nthOccurrence("/a/", '/', 0));
-		assertEquals(2, ServletHelper.nthOccurrence("/a/", '/', 1));
-	}
-
-	@Test
 	public void itExtractsElement () throws Exception {
 		assertEquals("", ServletHelper.extractPathElement("/", 0));
 		assertEquals("a", ServletHelper.extractPathElement("a/", 0));

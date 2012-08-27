@@ -1,6 +1,5 @@
 package com.vaguehope.lookfar.servlet;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -22,6 +21,7 @@ import com.vaguehope.lookfar.model.Update;
 import com.vaguehope.lookfar.model.UpdateHelper;
 import com.vaguehope.lookfar.util.AsciiTable;
 import com.vaguehope.lookfar.util.DateFormatFactory;
+import com.vaguehope.lookfar.util.StringHelper;
 
 public class NodeServlet extends HttpServlet {
 
@@ -189,7 +189,7 @@ public class NodeServlet extends HttpServlet {
 		if (propName == null) return;
 
 		if ("threshold".equals(propName)) {
-			String threshold = readerFirstLine(req, 255);
+			String threshold = StringHelper.readerFirstLine(req, 255);
 			setThreshold(resp, nodeName, keyName, threshold);
 		}
 		else {
@@ -198,7 +198,7 @@ public class NodeServlet extends HttpServlet {
 		}
 	}
 
-	public void setThreshold (HttpServletResponse resp, String nodeName, String keyName, String threshold) throws IOException {
+	private void setThreshold (HttpServletResponse resp, String nodeName, String keyName, String threshold) throws IOException {
 		try {
 			if (this.dataStore.setThreshold(nodeName, keyName, threshold) < 1) {
 				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to write threshold '" + threshold + "' for key '" + keyName + "' for node '" + nodeName + "'.");
@@ -209,23 +209,6 @@ public class NodeServlet extends HttpServlet {
 			LOG.warn("Failed to set threshold.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to set threshold: " + e.getMessage());
 			return;
-		}
-	}
-
-//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	private static String readerFirstLine (HttpServletRequest req, int maxLen) throws IOException {
-		String l = readerFirstLine(req);
-		return l.length() > maxLen ? l.substring(0, maxLen) : l;
-	}
-
-	private static String readerFirstLine (HttpServletRequest req) throws IOException {
-		BufferedReader r = req.getReader();
-		try {
-			return r.readLine();
-		}
-		finally {
-			r.close();
 		}
 	}
 

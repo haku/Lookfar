@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.vaguehope.lookfar.util.Http;
+import com.vaguehope.lookfar.util.StringHelper;
 
 public final class ServletHelper {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -85,7 +86,7 @@ public final class ServletHelper {
 
 	protected static String extractPathElement (String path, int n) {
 		if (n < 0) throw new IllegalArgumentException();
-		int x = (n == 0 ? 0 : nthOccurrence(path, '/', n - 1));
+		int x = (n == 0 ? 0 : StringHelper.nthOccurrence(path, '/', n - 1));
 		String element;
 		if (x >= 0) {
 			int y = path.indexOf('/', x + 1);
@@ -103,18 +104,6 @@ public final class ServletHelper {
 			element = n == 0 ? path : null;
 		}
 		return element;
-	}
-
-//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	protected static int nthOccurrence (String str, char c, int n) {
-		int x = str.indexOf(c);
-		if (x < 0) return x;
-		for (int i = 0; i < n; i++) {
-			x = str.indexOf(c, x + 1);
-			if (x < 0) return x;
-		}
-		return x;
 	}
 
 }
