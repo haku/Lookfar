@@ -31,7 +31,7 @@ public class UpdatePostServlet extends HttpServlet {
 
 	@Override
 	protected void doPost (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String node = ServletHelper.extractPathElement(req, resp);
+		String node = ServletHelper.extractPathElement(req, 1, resp);
 		if (node == null) return;
 
 		HashMap<String, String> data = Maps.newHashMap();

@@ -23,9 +23,11 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.Node;
+import com.vaguehope.lookfar.model.Update;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NodeServletTest {
@@ -77,6 +79,34 @@ public class NodeServletTest {
 		assertEquals(200, this.resp.getStatus());
 	}
 
+	/**
+	 * GET /node/$nodeName
+	 */
+	@Test
+	public void itReturnsSingleNode () throws Exception {
+		this.req.setPathInfo("/my_node");
+		givenSingleNodeWithUpdate("my_node", "some_key", "some value");
+
+		this.undertest.doGet(this.req, this.resp);
+
+		assertThat(this.resp.getContentAsString(), stringContainsInOrder(ImmutableList.of("my_node", "some_key", "some value")));
+		assertEquals(200, this.resp.getStatus());
+	}
+
+	/**
+	 * GET /node/$nodeName/$keyName
+	 */
+	@Test
+	public void itReturnsSingleNodeValue () throws Exception {
+		this.req.setPathInfo("/my_node/some_key");
+		givenSingleNodeWithUpdate("my_node", "some_key", "some value");
+
+		this.undertest.doGet(this.req, this.resp);
+
+		assertEquals("some value", this.resp.getContentAsString());
+		assertEquals(200, this.resp.getStatus());
+	}
+
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	private List<Node> givenSomeNodes (int n) throws SQLException {
@@ -86,6 +116,13 @@ public class NodeServletTest {
 		}
 		when(this.dataStore.getAllNodes()).thenReturn(nodes);
 		return nodes;
+	}
+
+	private Update givenSingleNodeWithUpdate (String nodeName, String key, String value) throws Exception {
+		Update update = new Update(nodeName, new Date(), key, value);
+		when(this.dataStore.getUpdate(nodeName, key)).thenReturn(update);
+		when(this.dataStore.getUpdates(nodeName)).thenReturn(ImmutableList.of(update));
+		return update;
 	}
 
 	private static Iterable<String> getNodeNames (List<Node> nodes) {

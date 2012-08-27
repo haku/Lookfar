@@ -144,11 +144,7 @@ public class DataStore {
 			ResultSet rs = st.executeQuery();
 			try {
 				while (rs.next()) {
-					String node = rs.getString(1);
-					Date updated = timestampToDate(rs.getTimestamp(2));
-					String key = rs.getString(3);
-					String value = rs.getString(4);
-					ret.add(new Update(node, updated, key, value));
+					ret.add(readUpdate(rs));
 				}
 				return ret;
 			}
@@ -159,6 +155,56 @@ public class DataStore {
 		finally {
 			st.close();
 		}
+	}
+
+	public List<Update> getUpdates(String nodeName) throws SQLException {
+		List<Update> ret = Lists.newArrayList();
+		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value FROM updates WHERE node=? ORDER BY node, key");
+		try {
+			st.setString(1, nodeName);
+			ResultSet rs = st.executeQuery();
+			try {
+				while (rs.next()) {
+					ret.add(readUpdate(rs));
+				}
+				return ret;
+			}
+			finally {
+				rs.close();
+			}
+		}
+		finally {
+			st.close();
+		}
+	}
+
+	public Update getUpdate(String nodeName, String keyName) throws SQLException {
+		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value FROM updates WHERE node=? AND key=?");
+		try {
+			st.setString(1, nodeName);
+			st.setString(2, keyName);
+			ResultSet rs = st.executeQuery();
+			try {
+				while (rs.next()) {
+					return readUpdate(rs);
+				}
+				return null;
+			}
+			finally {
+				rs.close();
+			}
+		}
+		finally {
+			st.close();
+		}
+	}
+
+	private static Update readUpdate (ResultSet rs) throws SQLException {
+		String node = rs.getString(1);
+		Date updated = timestampToDate(rs.getTimestamp(2));
+		String key = rs.getString(3);
+		String value = rs.getString(4);
+		return new Update(node, updated, key, value);
 	}
 
 	public void update (String node, Map<String, String> data) throws SQLException {

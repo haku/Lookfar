@@ -95,9 +95,10 @@ N = Node
 + A DELETE /user/<userName>
 + U   POST /password
   U    GET /node
+  U    GET /node/<nodeName>
   U    PUT /node/<nodeName>
   U DELETE /node/<nodeName>
-+ U    GET /node/<nodeName>/<keyName>
+  U    GET /node/<nodeName>/<keyName>
 + U DELETE /node/<nodeName>/<keyName>
 + U    GET /node/<nodeName>/<keyName>/expire
 + U   POST /node/<nodeName>/<keyName>/expire

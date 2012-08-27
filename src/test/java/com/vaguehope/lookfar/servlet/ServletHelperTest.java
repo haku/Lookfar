@@ -16,23 +16,68 @@ import org.junit.Test;
 public class ServletHelperTest {
 
 	@Test
-	public void itExtractsPathElement () throws Exception {
-		testExtractPathElement("/foo", "foo");
-		testExtractPathElement("/foo/", "foo");
-		testExtractPathElement("/foo/asf", "foo");
-		// TODO check error messages.
-		testExtractPathElement("", null);
-		testExtractPathElement("/", null);
-		testExtractPathElement("//", null);
-		testExtractPathElement("//sdf", null);
+	public void itCanFindNthElement () throws Exception {
+		assertEquals(-1, ServletHelper.nthOccurrence("", '/', 0));
+		assertEquals(-1, ServletHelper.nthOccurrence("a", '/', 0));
+		assertEquals(0, ServletHelper.nthOccurrence("/", '/', 0));
+		assertEquals(1, ServletHelper.nthOccurrence("//", '/', 1));
+		assertEquals(1, ServletHelper.nthOccurrence("a/", '/', 0));
+		assertEquals(-1, ServletHelper.nthOccurrence("a/", '/', 1));
+		assertEquals(0, ServletHelper.nthOccurrence("/a/", '/', 0));
+		assertEquals(2, ServletHelper.nthOccurrence("/a/", '/', 1));
 	}
 
-	private static void testExtractPathElement (String path, String element) throws IOException {
+	@Test
+	public void itExtractsElement () throws Exception {
+		assertEquals("", ServletHelper.extractPathElement("/", 0));
+		assertEquals("a", ServletHelper.extractPathElement("a/", 0));
+		assertEquals("", ServletHelper.extractPathElement("//", 1));
+		assertEquals("foo", ServletHelper.extractPathElement("/foo", 1));
+		assertEquals("foo", ServletHelper.extractPathElement("/foo/", 1));
+	}
+
+	@Test
+	public void itExtractsPathElement () throws Exception {
+		testExtractPathElement("/foo", 1, "foo");
+		testExtractPathElement("/foo/", 1, "foo");
+		testExtractPathElement("/foo/asf", 1, "foo");
+		// TODO check error messages.
+		testExtractPathElement("", 1, null);
+		testExtractPathElement("/", 1, null);
+		testExtractPathElement("//", 1, null);
+		testExtractPathElement("//sdf", 1, null);
+	}
+
+	@Test
+	public void itExtractsSecondPathElement () throws Exception {
+		testExtractPathElement("/foo/asf", 2, "asf");
+		testExtractPathElement("/foo/asf/", 2, "asf");
+		testExtractPathElement("/foo/asf/xcv", 2, "asf");
+		testExtractPathElement("//sdf", 2, "sdf");
+		// TODO check error messages.
+		testExtractPathElement("/foo/", 2, null);
+		testExtractPathElement("/foo//", 2, null);
+		testExtractPathElement("/foo///", 2, null);
+		testExtractPathElement("/foo", 2, null);
+		testExtractPathElement("", 2, null);
+		testExtractPathElement("/", 2, null);
+		testExtractPathElement("//", 2, null);
+	}
+
+	private static void testExtractPathElement (String path, int n, String expectedElement) throws IOException {
+		assertEquals(expectedElement, ServletHelper.extractPathElement(mockRequest(path), n, mockResponse()));
+	}
+
+	private static HttpServletRequest mockRequest (String path) {
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		HttpServletResponse resp = mock(HttpServletResponse.class);
 		when(req.getPathInfo()).thenReturn(path);
+		return req;
+	}
+
+	private static HttpServletResponse mockResponse () throws IOException {
+		HttpServletResponse resp = mock(HttpServletResponse.class);
 		when(resp.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
-		assertEquals(element, ServletHelper.extractPathElement(req, resp));
+		return resp;
 	}
 
 }

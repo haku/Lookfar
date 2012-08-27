@@ -17,6 +17,8 @@ import com.google.common.collect.TreeBasedTable;
 import com.vaguehope.lookfar.auth.PasswdGen;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.Node;
+import com.vaguehope.lookfar.model.Update;
+import com.vaguehope.lookfar.model.UpdateHelper;
 import com.vaguehope.lookfar.util.AsciiTable;
 import com.vaguehope.lookfar.util.DateFormatFactory;
 
@@ -35,6 +37,22 @@ public class NodeServlet extends HttpServlet {
 
 	@Override
 	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			if (req.getPathInfo() != null && req.getPathInfo().length() > 1) {
+				getNodeValue(req, resp);
+			}
+			else {
+				getNodes(resp);
+			}
+		}
+		catch (SQLException e) {
+			LOG.warn("Failed to read nodes.", e);
+			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to read nodes: " + e.getMessage());
+			return;
+		}
+	}
+
+	private void getNodes (HttpServletResponse resp) throws IOException, ServletException {
 		Table<Integer, String, String> table = TreeBasedTable.create();
 		try {
 			int i = 0;
@@ -51,9 +69,29 @@ public class NodeServlet extends HttpServlet {
 		}
 	}
 
+	private void getNodeValue (HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException {
+		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
+		if (nodeName == null) return;
+
+		String keyName = ServletHelper.extractPathElement(req, 2);
+		if (keyName == null) {
+			UpdateHelper.printUpdates(this.dataStore.getUpdates(nodeName), resp);
+		}
+		else {
+			Update update = this.dataStore.getUpdate(nodeName, keyName);
+			if (update != null) {
+				resp.getWriter().print(update.getValue());
+			}
+			else {
+				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to find key with name '" + keyName + "' for node with name '" + nodeName + "'.");
+				return;
+			}
+		}
+	}
+
 	@Override
 	protected void doPut (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String nodeName = ServletHelper.extractPathElement(req, resp);
+		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
 		String pw = PasswdGen.makePasswd();
@@ -77,7 +115,7 @@ public class NodeServlet extends HttpServlet {
 
 	@Override
 	protected void doDelete (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String nodeName = ServletHelper.extractPathElement(req, resp);
+		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
 		try {

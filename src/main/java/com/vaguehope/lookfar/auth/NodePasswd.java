@@ -30,7 +30,7 @@ public class NodePasswd implements PasswdChecker {
 	@Override
 	public boolean verifyPasswd (HttpServletRequest req, String user, String pass) throws IOException {
 		try {
-			String nodeName = ServletHelper.extractPathElement(req);
+			String nodeName = ServletHelper.extractPathElement(req, 1);
 			if (nodeName == null || !nodeName.equals(user)) return false;
 			String hashpw = this.paswdCache.get(nodeName);
 			if (hashpw == null) return false;
