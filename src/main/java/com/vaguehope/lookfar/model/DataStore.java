@@ -157,7 +157,7 @@ public class DataStore {
 		}
 	}
 
-	public List<Update> getUpdates(String nodeName) throws SQLException {
+	public List<Update> getUpdates (String nodeName) throws SQLException {
 		List<Update> ret = Lists.newArrayList();
 		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value FROM updates WHERE node=? ORDER BY node, key");
 		try {
@@ -178,7 +178,7 @@ public class DataStore {
 		}
 	}
 
-	public Update getUpdate(String nodeName, String keyName) throws SQLException {
+	public Update getUpdate (String nodeName, String keyName) throws SQLException {
 		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value FROM updates WHERE node=? AND key=?");
 		try {
 			st.setString(1, nodeName);
@@ -240,6 +240,20 @@ public class DataStore {
 			stInsert.close();
 		}
 	}
+
+	public int deleteUpdate (String nodeName, String keyName) throws SQLException {
+		PreparedStatement st = this.conn.prepareStatement("DELETE FROM updates WHERE node=? AND key=?");
+		try {
+			st.setString(1, nodeName);
+			st.setString(2, keyName);
+			return st.executeUpdate();
+		}
+		finally {
+			st.close();
+		}
+	}
+
+//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	private static Date timestampToDate (Timestamp t) {
 		return t == null ? null : new Date(t.getTime());

@@ -74,7 +74,9 @@ public class NodeServletTest {
 	public void itDeletesNodes () throws Exception {
 		this.req.setPathInfo("/my_node");
 		when(this.dataStore.deleteNode("my_node")).thenReturn(1);
+
 		this.undertest.doDelete(this.req, this.resp);
+
 		verify(this.dataStore).deleteNode("my_node");
 		assertEquals(200, this.resp.getStatus());
 	}
@@ -104,6 +106,21 @@ public class NodeServletTest {
 		this.undertest.doGet(this.req, this.resp);
 
 		assertEquals("some value", this.resp.getContentAsString());
+		assertEquals(200, this.resp.getStatus());
+	}
+
+	/**
+	 * DELETE /node/$nodeName/$keyName
+	 */
+	@SuppressWarnings("boxing")
+	@Test
+	public void itDeletesKey () throws Exception {
+		this.req.setPathInfo("/my_node/some_key");
+		when(this.dataStore.deleteUpdate("my_node", "some_key")).thenReturn(1);
+
+		this.undertest.doDelete(this.req, this.resp);
+
+		verify(this.dataStore).deleteUpdate("my_node", "some_key");
 		assertEquals(200, this.resp.getStatus());
 	}
 

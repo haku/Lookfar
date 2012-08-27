@@ -118,6 +118,17 @@ public class NodeServlet extends HttpServlet {
 		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
+		String keyName = ServletHelper.extractPathElement(req, 2);
+		if (keyName == null) {
+			deleteNode(resp, nodeName);
+		}
+		else {
+			deleteKey(resp, nodeName, keyName);
+		}
+
+	}
+
+	private void deleteNode (HttpServletResponse resp, String nodeName) throws IOException {
 		try {
 			if (this.dataStore.deleteNode(nodeName) < 1) {
 				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to delete node with name '" + nodeName + "'.");
@@ -127,6 +138,20 @@ public class NodeServlet extends HttpServlet {
 		catch (SQLException e) {
 			LOG.warn("Failed to delete node.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete node: " + e.getMessage());
+			return;
+		}
+	}
+
+	private void deleteKey (HttpServletResponse resp, String nodeName, String keyName) throws IOException {
+		try {
+			if (this.dataStore.deleteUpdate(nodeName, keyName) < 1) {
+				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to delete key with node '" + nodeName + "' and name '" + nodeName + "'.");
+				return;
+			}
+		}
+		catch (SQLException e) {
+			LOG.warn("Failed to delete key.", e);
+			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete key: " + e.getMessage());
 			return;
 		}
 	}
