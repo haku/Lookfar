@@ -60,7 +60,7 @@ public class NodeServlet extends HttpServlet {
 		String hashpw = BCrypt.hashpw(pw, BCrypt.gensalt());
 
 		try {
-			this.dataStore.putNode(nodeName, hashpw);
+			this.dataStore.upsertNode(nodeName, hashpw);
 		}
 		catch (SQLException e) {
 			LOG.warn("Failed to store node.", e);
@@ -68,6 +68,7 @@ public class NodeServlet extends HttpServlet {
 			return;
 		}
 
+		resp.setStatus(HttpServletResponse.SC_CREATED);
 		Table<Integer, String, String> table = TreeBasedTable.create();
 		table.put(Integer.valueOf(0), "node", nodeName);
 		table.put(Integer.valueOf(0), "pw", pw);

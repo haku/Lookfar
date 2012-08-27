@@ -94,7 +94,7 @@ public class DataStore {
 		}
 	}
 
-	public void putNode (String nodeName, String hashpw) throws SQLException {
+	public void upsertNode (String nodeName, String hashpw) throws SQLException {
 		PreparedStatement st = this.conn.prepareStatement("UPDATE nodes SET pass=?, updated=now() WHERE node=?");
 		try {
 			st.setString(1, hashpw);
@@ -109,7 +109,7 @@ public class DataStore {
 		}
 	}
 
-	public void insertNode (String nodeName, String hashpw) throws SQLException {
+	private void insertNode (String nodeName, String hashpw) throws SQLException {
 		PreparedStatement st = this.conn.prepareStatement("INSERT INTO nodes (node, updated, pass) VALUES (?, now(), ?)");
 		try {
 			st.setString(1, nodeName);
