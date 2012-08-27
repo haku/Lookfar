@@ -72,12 +72,12 @@ public final class ServletHelper {
 	public static String extractPathElement (HttpServletRequest req, int n, HttpServletResponse resp) throws IOException {
 		String pathInfo = req.getPathInfo();
 		if (pathInfo == null || pathInfo.length() < 2) {
-			if (resp != null) ServletHelper.error(resp, HttpServletResponse.SC_BAD_REQUEST, "No element specified.");
+			if (resp != null) ServletHelper.error(resp, HttpServletResponse.SC_BAD_REQUEST, "No path specified.");
 			return null;
 		}
 		String element = extractPathElement(pathInfo, n);
 		if (element == null || element.length() < 1) {
-			if (resp != null) ServletHelper.error(resp, HttpServletResponse.SC_BAD_REQUEST, "No element found.");
+			if (resp != null) ServletHelper.error(resp, HttpServletResponse.SC_BAD_REQUEST, "Path element missing.");
 			return null;
 		}
 		return element;

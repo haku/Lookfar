@@ -11,12 +11,14 @@ public class Update {
 	private final Date updated;
 	private final String key;
 	private final String value;
+	private final String threshold;
 
-	public Update (String node, Date updated, String key, String value) {
+	public Update (String node, Date updated, String key, String value, String threshold) {
 		this.node = node;
 		this.updated = updated;
 		this.key = key;
 		this.value = value;
+		this.threshold = threshold;
 	}
 
 	public String getNode () {
@@ -33,6 +35,10 @@ public class Update {
 
 	public String getValue () {
 		return this.value;
+	}
+
+	public String getThreshold () {
+		return this.threshold;
 	}
 
 	public UpdateFlag calculateFlag () {

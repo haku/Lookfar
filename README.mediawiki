@@ -102,8 +102,8 @@ N = Node
   U DELETE /node/<nodeName>/<keyName>
 + U    GET /node/<nodeName>/<keyName>/expire
 + U   POST /node/<nodeName>/<keyName>/expire
-+ U    GET /node/<nodeName>/<keyName>/threshold
-+ U   POST /node/<nodeName>/<keyName>/threshold
+  U    GET /node/<nodeName>/<keyName>/threshold
+  U   POST /node/<nodeName>/<keyName>/threshold
   U    GET /update
   N   POST /update/<nodeName>
 </pre>

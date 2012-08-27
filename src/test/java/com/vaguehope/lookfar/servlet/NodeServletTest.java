@@ -124,6 +124,36 @@ public class NodeServletTest {
 		assertEquals(200, this.resp.getStatus());
 	}
 
+	/**
+	 * GET /node/$nodeName/$keyName/threshold
+	 */
+	@Test
+	public void itGetsThreshold () throws Exception {
+		this.req.setPathInfo("/my_node/some_key/threshold");
+		givenSingleNodeWithUpdate("my_node", "some_key", "some value", "==0");
+
+		this.undertest.doGet(this.req, this.resp);
+
+		assertEquals("==0", this.resp.getContentAsString());
+		assertEquals(200, this.resp.getStatus());
+	}
+
+	/**
+	 * POST /node/$nodeName/$keyName/threshold
+	 */
+	@SuppressWarnings("boxing")
+	@Test
+	public void itSetsThreshold () throws Exception {
+		this.req.setPathInfo("/my_node/some_key/threshold");
+		this.req.setContent("==0".getBytes());
+		when(this.dataStore.setThreshold("my_node", "some_key", "==0")).thenReturn(1);
+
+		this.undertest.doPost(this.req, this.resp);
+
+		verify(this.dataStore).setThreshold("my_node", "some_key", "==0");
+		assertEquals(200, this.resp.getStatus());
+	}
+
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	private List<Node> givenSomeNodes (int n) throws SQLException {
@@ -136,7 +166,11 @@ public class NodeServletTest {
 	}
 
 	private Update givenSingleNodeWithUpdate (String nodeName, String key, String value) throws Exception {
-		Update update = new Update(nodeName, new Date(), key, value);
+		return givenSingleNodeWithUpdate(nodeName, key, value, null);
+	}
+
+	private Update givenSingleNodeWithUpdate (String nodeName, String key, String value, String threshold) throws Exception {
+		Update update = new Update(nodeName, new Date(), key, value, threshold);
 		when(this.dataStore.getUpdate(nodeName, key)).thenReturn(update);
 		when(this.dataStore.getUpdates(nodeName)).thenReturn(ImmutableList.of(update));
 		return update;

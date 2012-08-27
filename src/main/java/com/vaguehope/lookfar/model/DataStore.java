@@ -139,7 +139,7 @@ public class DataStore {
 
 	public List<Update> getAllUpdates () throws SQLException {
 		List<Update> ret = Lists.newArrayList();
-		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value FROM updates ORDER BY node, key");
+		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value,threshold FROM updates ORDER BY node, key");
 		try {
 			ResultSet rs = st.executeQuery();
 			try {
@@ -159,7 +159,7 @@ public class DataStore {
 
 	public List<Update> getUpdates (String nodeName) throws SQLException {
 		List<Update> ret = Lists.newArrayList();
-		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value FROM updates WHERE node=? ORDER BY node, key");
+		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value,threshold FROM updates WHERE node=? ORDER BY node, key");
 		try {
 			st.setString(1, nodeName);
 			ResultSet rs = st.executeQuery();
@@ -179,7 +179,7 @@ public class DataStore {
 	}
 
 	public Update getUpdate (String nodeName, String keyName) throws SQLException {
-		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value FROM updates WHERE node=? AND key=?");
+		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value,threshold FROM updates WHERE node=? AND key=?");
 		try {
 			st.setString(1, nodeName);
 			st.setString(2, keyName);
@@ -204,7 +204,8 @@ public class DataStore {
 		Date updated = timestampToDate(rs.getTimestamp(2));
 		String key = rs.getString(3);
 		String value = rs.getString(4);
-		return new Update(node, updated, key, value);
+		String threshold = rs.getString(5);
+		return new Update(node, updated, key, value, threshold);
 	}
 
 	public void update (String node, Map<String, String> data) throws SQLException {
@@ -251,6 +252,20 @@ public class DataStore {
 		finally {
 			st.close();
 		}
+	}
+
+	public int setThreshold (String nodeName, String keyName, String threshold) throws SQLException {
+		PreparedStatement st = this.conn.prepareStatement("UPDATE updates SET threshold=? WHERE node=? AND key=?");
+		try {
+			st.setString(1, threshold);
+			st.setString(2, nodeName);
+			st.setString(3, keyName);
+			return st.executeUpdate();
+		}
+		finally {
+			st.close();
+		}
+
 	}
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

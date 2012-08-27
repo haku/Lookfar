@@ -1,5 +1,6 @@
 package com.vaguehope.lookfar.servlet;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -78,9 +79,19 @@ public class NodeServlet extends HttpServlet {
 			UpdateHelper.printUpdates(this.dataStore.getUpdates(nodeName), resp);
 		}
 		else {
+			String propName = ServletHelper.extractPathElement(req, 3);
 			Update update = this.dataStore.getUpdate(nodeName, keyName);
 			if (update != null) {
-				resp.getWriter().print(update.getValue());
+				if (propName == null) {
+					resp.getWriter().print(update.getValue());
+				}
+				else if ("threshold".equals(propName)) {
+					resp.getWriter().print(update.getThreshold());
+				}
+				else {
+					ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Unknown property: " + propName + "'.");
+					return;
+				}
 			}
 			else {
 				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to find key with name '" + keyName + "' for node with name '" + nodeName + "'.");
@@ -145,7 +156,7 @@ public class NodeServlet extends HttpServlet {
 	private void deleteKey (HttpServletResponse resp, String nodeName, String keyName) throws IOException {
 		try {
 			if (this.dataStore.deleteUpdate(nodeName, keyName) < 1) {
-				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to delete key with node '" + nodeName + "' and name '" + nodeName + "'.");
+				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to delete key '" + keyName + "' for node '" + nodeName + "'.");
 				return;
 			}
 		}
@@ -153,6 +164,54 @@ public class NodeServlet extends HttpServlet {
 			LOG.warn("Failed to delete key.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete key: " + e.getMessage());
 			return;
+		}
+	}
+
+	@Override
+	protected void doPost (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
+		if (nodeName == null) return;
+
+		String keyName = ServletHelper.extractPathElement(req, 2, resp);
+		if (keyName == null) return;
+
+		String propName = ServletHelper.extractPathElement(req, 3, resp);
+		if (propName == null) return;
+
+		try {
+			if ("threshold".equals(propName)) {
+				String threshold = readerFirstLine(req, 255);
+				if (this.dataStore.setThreshold(nodeName, keyName, threshold) < 1) {
+					ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to write threshold '" + threshold + "' for key '" + keyName + "' for node '" + nodeName + "'.");
+					return;
+				}
+			}
+			else {
+				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Unknown property: " + propName + "'.");
+				return;
+			}
+		}
+		catch (SQLException e) {
+			LOG.warn("Failed to set property.", e);
+			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to set property: " + e.getMessage());
+			return;
+		}
+	}
+
+//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	private static String readerFirstLine (HttpServletRequest req, int maxLen) throws IOException {
+		String l = readerFirstLine(req);
+		return l.length() > maxLen ? l.substring(0, maxLen) : l;
+	}
+
+	private static String readerFirstLine (HttpServletRequest req) throws IOException {
+		BufferedReader r = req.getReader();
+		try {
+			return r.readLine();
+		}
+		finally {
+			r.close();
 		}
 	}
 
