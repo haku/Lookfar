@@ -87,7 +87,7 @@ public class UpdateService extends IntentService {
 			Intent notificationIntent = new Intent(context, MainActivity.class);
 			PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
-			Notification n = new Notification(R.drawable.service_notification, "Lookfar", System.currentTimeMillis());
+			Notification n = new Notification(R.drawable.service_notification, "Lookfar: " + title, System.currentTimeMillis());
 			n.flags = Notification.FLAG_AUTO_CANCEL;
 //			n.defaults = Notification.DEFAULT_ALL;
 			n.setLatestEventInfo(context, title != null ? title : "Lookfar", msg, contentIntent);
