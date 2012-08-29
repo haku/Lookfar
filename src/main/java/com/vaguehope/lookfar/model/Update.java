@@ -2,6 +2,8 @@ package com.vaguehope.lookfar.model;
 
 import java.util.Date;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import com.google.common.base.Objects;
 import com.vaguehope.lookfar.config.Config;
 import com.vaguehope.lookfar.threshold.ThresholdStatus;
@@ -44,6 +46,7 @@ public class Update {
 		return this.threshold;
 	}
 
+	@JsonProperty("flag")
 	public UpdateFlag calculateFlag () {
 		if (this.updated == null || System.currentTimeMillis() - this.updated.getTime() > Config.UPDATE_DEFAULT_EXPIRY_AGE_MILLIS) {
 			return UpdateFlag.EXPIRED;

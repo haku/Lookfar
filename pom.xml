@@ -57,6 +57,12 @@
 			<version>0.3m</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.9</version>
+		</dependency>
+
 		<!-- Test -->
 
 		<dependency>
@@ -97,6 +103,13 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>3.1.2.RELEASE</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency> <!-- https://github.com/skyscreamer/JSONassert -->
+			<groupId>org.skyscreamer</groupId>
+			<artifactId>jsonassert</artifactId>
+			<version>1.0.0</version>
 			<scope>test</scope>
 		</dependency>
 
