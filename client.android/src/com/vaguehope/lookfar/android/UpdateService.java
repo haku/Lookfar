@@ -89,7 +89,7 @@ public class UpdateService extends IntentService {
 
 			Notification n = new Notification(R.drawable.service_notification, "Lookfar", System.currentTimeMillis());
 			n.flags = Notification.FLAG_AUTO_CANCEL;
-			n.defaults = Notification.DEFAULT_ALL;
+//			n.defaults = Notification.DEFAULT_ALL;
 			n.setLatestEventInfo(context, title != null ? title : "Lookfar", msg, contentIntent);
 			n.number = count;
 
