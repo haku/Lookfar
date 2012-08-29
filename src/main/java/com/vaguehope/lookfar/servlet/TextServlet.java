@@ -14,16 +14,16 @@ import org.slf4j.LoggerFactory;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.UpdateHelper;
 
-public class UpdateGetServlet extends HttpServlet {
+public class TextServlet extends HttpServlet {
 
-	public static final String CONTEXT = "/update";
+	public static final String CONTEXT = "/text";
 
 	private static final long serialVersionUID = -1999920374623838318L;
-	private static final Logger LOG = LoggerFactory.getLogger(UpdateGetServlet.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TextServlet.class);
 
 	private final DataStore dataStore;
 
-	public UpdateGetServlet (DataStore dataStore) {
+	public TextServlet (DataStore dataStore) {
 		this.dataStore = dataStore;
 	}
 

@@ -25,7 +25,7 @@ import com.vaguehope.lookfar.reporter.JvmReporter;
 import com.vaguehope.lookfar.reporter.Reporter;
 import com.vaguehope.lookfar.servlet.EchoServlet;
 import com.vaguehope.lookfar.servlet.NodeServlet;
-import com.vaguehope.lookfar.servlet.UpdateGetServlet;
+import com.vaguehope.lookfar.servlet.TextServlet;
 import com.vaguehope.lookfar.servlet.UpdatePostServlet;
 import com.vaguehope.lookfar.threshold.ThresholdParser;
 
@@ -79,7 +79,7 @@ public final class Main {
 		if (Modes.isSecure()) addFilter(generalServlets, new HerokoHttpsFilter());
 		addFilter(generalServlets, new BasicAuthFilter(new SharedPasswd()));
 		generalServlets.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
-		generalServlets.addServlet(new ServletHolder(new UpdateGetServlet(dataStore)), UpdateGetServlet.CONTEXT);
+		generalServlets.addServlet(new ServletHolder(new TextServlet(dataStore)), TextServlet.CONTEXT);
 		generalServlets.addServlet(new ServletHolder(new NodeServlet(dataStore)), NodeServlet.CONTEXT);
 		return generalServlets;
 	}
