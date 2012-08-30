@@ -5,7 +5,7 @@ import java.util.Date;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.google.common.base.Objects;
-import com.vaguehope.lookfar.config.Config;
+import com.vaguehope.lookfar.expire.ExpireStatus;
 import com.vaguehope.lookfar.threshold.ThresholdStatus;
 
 public class Update {
@@ -16,14 +16,18 @@ public class Update {
 	private final String value;
 	private final String threshold;
 	private final ThresholdStatus thresholdStatus;
+	private final String expire;
+	private final ExpireStatus expireStatus;
 
-	public Update (String node, Date updated, String key, String value, String threshold, ThresholdStatus thresholdStatus) {
+	public Update (String node, Date updated, String key, String value, String threshold, ThresholdStatus thresholdStatus, String expire, ExpireStatus expireStatus) {
 		this.node = node;
 		this.updated = updated;
 		this.key = key;
 		this.value = value;
 		this.threshold = threshold;
 		this.thresholdStatus = thresholdStatus;
+		this.expire = expire;
+		this.expireStatus = expireStatus;
 	}
 
 	public String getNode () {
@@ -46,12 +50,13 @@ public class Update {
 		return this.threshold;
 	}
 
+	public String getExpire () {
+		return this.expire;
+	}
+
 	@JsonProperty("flag")
 	public UpdateFlag calculateFlag () {
-		if (this.updated == null || System.currentTimeMillis() - this.updated.getTime() > Config.UPDATE_DEFAULT_EXPIRY_AGE_MILLIS) {
-			return UpdateFlag.EXPIRED;
-		}
-		return UpdateFlag.fromThreshold(this.thresholdStatus);
+		return UpdateFlag.fromThresholdAndExpire(this.thresholdStatus, this.expireStatus);
 	}
 
 	@Override

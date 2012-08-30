@@ -19,6 +19,7 @@ import com.vaguehope.lookfar.auth.NodePasswd;
 import com.vaguehope.lookfar.auth.SharedPasswd;
 import com.vaguehope.lookfar.config.Config;
 import com.vaguehope.lookfar.config.Modes;
+import com.vaguehope.lookfar.expire.ExpireParser;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.UpdateFactory;
 import com.vaguehope.lookfar.reporter.JvmReporter;
@@ -48,7 +49,8 @@ public final class Main {
 
 		// Model.
 		ThresholdParser thresholdParser = new ThresholdParser();
-		UpdateFactory updateFactory = new UpdateFactory(thresholdParser);
+		ExpireParser expireParser = new ExpireParser();
+		UpdateFactory updateFactory = new UpdateFactory(thresholdParser, expireParser);
 		DataStore dataStore = new DataStore(updateFactory );
 
 		// Servlets.

@@ -25,6 +25,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.vaguehope.lookfar.expire.ExpireStatus;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.Node;
 import com.vaguehope.lookfar.model.Update;
@@ -131,7 +132,7 @@ public class NodeServletTest {
 	@Test
 	public void itGetsThreshold () throws Exception {
 		this.req.setPathInfo("/my_node/some_key/threshold");
-		givenSingleNodeWithUpdate("my_node", "some_key", "some value", "==0");
+		givenSingleNodeWithUpdate("my_node", "some_key", "some value", "==0", null);
 
 		this.undertest.doGet(this.req, this.resp);
 
@@ -155,6 +156,9 @@ public class NodeServletTest {
 		assertEquals(200, this.resp.getStatus());
 	}
 
+	/**
+	 * DELETE /node/$nodeName/$keyName/threshold
+	 */
 	@SuppressWarnings("boxing")
 	@Test
 	public void itDeletesThreshold () throws Exception {
@@ -164,6 +168,51 @@ public class NodeServletTest {
 		this.undertest.doDelete(this.req, this.resp);
 
 		verify(this.dataStore).setThreshold("my_node", "some_key", null);
+		assertEquals(200, this.resp.getStatus());
+	}
+
+	/**
+	 * GET /node/$nodeName/$keyName/expire
+	 */
+	@Test
+	public void itGetsExpire () throws Exception {
+		this.req.setPathInfo("/my_node/some_key/expire");
+		givenSingleNodeWithUpdate("my_node", "some_key", "some value", null, "1h");
+
+		this.undertest.doGet(this.req, this.resp);
+
+		assertEquals("1h", this.resp.getContentAsString());
+		assertEquals(200, this.resp.getStatus());
+	}
+
+	/**
+	 * POST /node/$nodeName/$keyName/expire
+	 */
+	@SuppressWarnings("boxing")
+	@Test
+	public void itSetsExpire () throws Exception {
+		this.req.setPathInfo("/my_node/some_key/expire");
+		this.req.setContent("2d".getBytes());
+		when(this.dataStore.setExpire("my_node", "some_key", "2d")).thenReturn(1);
+
+		this.undertest.doPost(this.req, this.resp);
+
+		verify(this.dataStore).setExpire("my_node", "some_key", "2d");
+		assertEquals(200, this.resp.getStatus());
+	}
+
+	/**
+	 * DELETE /node/$nodeName/$keyName/expire
+	 */
+	@SuppressWarnings("boxing")
+	@Test
+	public void itDeletesExpire () throws Exception {
+		this.req.setPathInfo("/my_node/some_key/expire");
+		when(this.dataStore.setExpire("my_node", "some_key", null)).thenReturn(1);
+
+		this.undertest.doDelete(this.req, this.resp);
+
+		verify(this.dataStore).setExpire("my_node", "some_key", null);
 		assertEquals(200, this.resp.getStatus());
 	}
 
@@ -179,11 +228,11 @@ public class NodeServletTest {
 	}
 
 	private Update givenSingleNodeWithUpdate (String nodeName, String key, String value) throws Exception {
-		return givenSingleNodeWithUpdate(nodeName, key, value, null);
+		return givenSingleNodeWithUpdate(nodeName, key, value, null, null);
 	}
 
-	private Update givenSingleNodeWithUpdate (String nodeName, String key, String value, String threshold) throws Exception {
-		Update update = new Update(nodeName, new Date(), key, value, threshold, ThresholdStatus.OK);
+	private Update givenSingleNodeWithUpdate (String nodeName, String key, String value, String threshold, String expire) throws Exception {
+		Update update = new Update(nodeName, new Date(), key, value, threshold, ThresholdStatus.OK, expire, ExpireStatus.OK);
 		when(this.dataStore.getUpdate(nodeName, key)).thenReturn(update);
 		when(this.dataStore.getUpdates(nodeName)).thenReturn(ImmutableList.of(update));
 		return update;
