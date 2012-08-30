@@ -11,6 +11,10 @@ Postgresql is required.
 <code>create table nodes (node VARCHAR(16), updated TIMESTAMP, pass VARCHAR(96));<br>
 create table updates (node VARCHAR(16), updated TIMESTAMP, key VARCHAR(255), value VARCHAR(255), threshold VARCHAR(255), expire VARCHAR(255));</code>
 
+= UI =
+
+<code><nowiki>curl -u "user_name:shared_password" https://lookfar.herokuapp.com/text</nowiki></code>
+
 = API =
 
 == Nodes ==
