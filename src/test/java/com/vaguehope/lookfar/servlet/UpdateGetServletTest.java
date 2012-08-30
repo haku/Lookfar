@@ -16,6 +16,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import com.google.common.collect.Lists;
+import com.vaguehope.lookfar.expire.ExpireStatus;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.Update;
 import com.vaguehope.lookfar.threshold.ThresholdStatus;
@@ -48,7 +49,7 @@ public class UpdateGetServletTest {
 	private List<Update> givenSomeUpdates (int n) throws SQLException {
 		List<Update> nodes = Lists.newArrayList();
 		for (int i = 0; i < n; i++) {
-			nodes.add(new Update("node" + i, new Date(), "key" + i, "value" + i, "==0", ThresholdStatus.EXCEEDED));
+			nodes.add(new Update("node" + i, new Date(), "key" + i, "value" + i, "==0", ThresholdStatus.EXCEEDED, "1d", ExpireStatus.OK));
 		}
 		when(this.dataStore.getAllUpdates()).thenReturn(nodes);
 		return nodes;

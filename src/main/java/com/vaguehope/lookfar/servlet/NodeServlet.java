@@ -89,6 +89,9 @@ public class NodeServlet extends HttpServlet {
 				else if ("threshold".equals(propName)) {
 					resp.getWriter().print(update.getThreshold());
 				}
+				else if ("expire".equals(propName)) {
+					resp.getWriter().print(update.getExpire());
+				}
 				else {
 					ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Unknown property: " + propName + "'.");
 					return;
@@ -142,6 +145,9 @@ public class NodeServlet extends HttpServlet {
 			else if ("threshold".equals(propName)) {
 				setThreshold(resp, nodeName, keyName, null);
 			}
+			else if ("expire".equals(propName)) {
+				setExpire(resp, nodeName, keyName, null);
+			}
 			else {
 				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Unknown property: " + propName + "'.");
 				return;
@@ -190,8 +196,12 @@ public class NodeServlet extends HttpServlet {
 		if (propName == null) return;
 
 		if ("threshold".equals(propName)) {
-			String threshold = StringHelper.readerFirstLine(req, 255);
+			String threshold = StringHelper.readerFirstLine(req, 50);
 			setThreshold(resp, nodeName, keyName, threshold);
+		}
+		else if ("expire".equals(propName)) {
+			String expire = StringHelper.readerFirstLine(req, 50);
+			setExpire(resp, nodeName, keyName, expire);
 		}
 		else {
 			ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Unknown property: " + propName + "'.");
@@ -209,6 +219,20 @@ public class NodeServlet extends HttpServlet {
 		catch (SQLException e) {
 			LOG.warn("Failed to set threshold.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to set threshold: " + e.getMessage());
+			return;
+		}
+	}
+
+	private void setExpire (HttpServletResponse resp, String nodeName, String keyName, String expire) throws IOException {
+		try {
+			if (this.dataStore.setExpire(nodeName, keyName, expire) < 1) {
+				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to write expire '" + expire + "' for key '" + keyName + "' for node '" + nodeName + "'.");
+				return;
+			}
+		}
+		catch (SQLException e) {
+			LOG.warn("Failed to set expire.", e);
+			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to set expire: " + e.getMessage());
 			return;
 		}
 	}
