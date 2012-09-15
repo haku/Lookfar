@@ -20,7 +20,7 @@ For example, on a node called 'pi0' you could have:
  #!/bin/bash
  set -eu
  DATA="uptime=$(cat /proc/uptime | cut -d ' ' -f 1)"
- curl -d "$DATA" -u "pi0:1234567890abcdefghijklmno" "https://lookfar.herokuapp.com/update/pi0"
+ curl -d "$DATA" -u "pi0:1234567890abcdefghijklmno" "https://lookfar.example.com/update/pi0"
 
 The can them be scheduled to run every 5 minutes in crontab:
 
@@ -28,7 +28,7 @@ The can them be scheduled to run every 5 minutes in crontab:
 
 Since it is expect that this datum will be refreshed every 5 minutes, lets change the the expire time from the default of 24 hours to 15 minutes so that we are alerted quite promptly if it stops working:
 
- curl -u "user_name:shared_password" https://lookfar.herokuapp.com/node/pi0/uptime/expire -d "15m"
+ curl -u "user_name:shared_password" https://lookfar.example.com/node/pi0/uptime/expire -d "15m"
 
 And we are finished.  In Lookfar's UI this will now look something like this:
 
@@ -77,38 +77,38 @@ The database connection is configured by setting an environment variable, for ex
 
 Lookfar has a minimalistic UI that can be used in a browser or on a command line:
 
- curl -u "user_name:shared_password" https://lookfar.herokuapp.com/text
+ curl -u "user_name:shared_password" https://lookfar.example.com/text
 
 = API =
 
 == Nodes ==
 
 List nodes:<br>
- curl -u "user_name:shared_password" https://lookfar.herokuapp.com/node
+ curl -u "user_name:shared_password" https://lookfar.example.com/node
 
 Create a node or reset a node's password:<br>
- curl -u "user_name:shared_password" -X PUT https://lookfar.herokuapp.com/node/exampleNode
+ curl -u "user_name:shared_password" -X PUT https://lookfar.example.com/node/exampleNode
 
 Delete a node:<br>
- curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode
+ curl -u "user_name:shared_password" -X DELETE https://lookfar.example.com/node/exampleNode
 
 == Updates ==
 
 === Managing ===
 
 List all updates in text format:<br>
- curl -u "user_name:shared_password" https://lookfar.herokuapp.com/text
+ curl -u "user_name:shared_password" https://lookfar.example.com/text
 
 List all updates in JSON format:<br>
- curl -u "user_name:shared_password" https://lookfar.herokuapp.com/update
+ curl -u "user_name:shared_password" https://lookfar.example.com/update
 
 Delete an update:<br>
- curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1
+ curl -u "user_name:shared_password" -X DELETE https://lookfar.example.com/node/exampleNode/var1
 
 === Pushing ===
 
 Write an update:<br>
- curl -u "exampleNode:node_password" -d "var1=123&var2=456" https://lookfar.herokuapp.com/update/exampleNode
+ curl -u "exampleNode:node_password" -d "var1=123&var2=456" https://lookfar.example.com/update/exampleNode
 
 == Expire periods ==
 
@@ -117,10 +117,10 @@ Default expire period is 1d.  Set custom expire times using strings like <code>1
 === Setting ===
 
 Set a custom period:<br>
- curl -u "user_name:shared_password" -d "1h" https://lookfar.herokuapp.com/node/exampleNode/var1/expire
+ curl -u "user_name:shared_password" -d "1h" https://lookfar.example.com/node/exampleNode/var1/expire
 
 Clear a custom period (reverts to default):<br>
- curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1/expire
+ curl -u "user_name:shared_password" -X DELETE https://lookfar.example.com/node/exampleNode/var1/expire
 
 == Thresholds ==
 
@@ -145,10 +145,10 @@ A rule is what the value should be.  Breaking the rule triggers a warning.
 === Setting ===
 
 Set a threshold:<br>
- curl -u "user_name:shared_password" -d "==0" https://lookfar.herokuapp.com/node/exampleNode/var1/threshold
+ curl -u "user_name:shared_password" -d "==0" https://lookfar.example.com/node/exampleNode/var1/threshold
 
 Clear a threshold:<br>
- curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1/threshold
+ curl -u "user_name:shared_password" -X DELETE https://lookfar.example.com/node/exampleNode/var1/threshold
 
 == Summary of context paths ==
 
