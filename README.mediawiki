@@ -12,7 +12,7 @@ Lookfar is made available under the Apache 2 license.
 
 This README is a work in progress.  Feel free to ask questions.
 
-= Bare minimum example: Monitor a server is online =
+= Bare minimum example: Monitor that a server is online =
 
 Monitoring the uptime of a server requires a small shell script to collect the data and make the request.
 For example, on a node called 'pi0' you could have:
