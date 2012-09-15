@@ -10,6 +10,45 @@ A light-weight HTTP-based monitoring application.
 
 Lookfar is made available under the Apache 2 license.
 
+This README is a work in progress.  Feel free to ask questions.
+
+= Bare minimum example: Monitor a server is online =
+
+Monitoring the uptime of a server requires a small shell script to collect the data and make the request.
+For example, on a node called 'pi0' you could have:
+
+<code>
+ #!/bin/bash
+ set -eu
+ DATA="uptime=$(cat /proc/uptime | cut -d ' ' -f 1)"
+ curl -d "$DATA" -u "pi0:1234567890abcdefghijklmno" "https://lookfar.herokuapp.com/update/pi0"
+</code>
+
+The can them be scheduled to run every 5 minutes in crontab:
+
+<code>
+ */5 * * * * /home/pi/bin/lookfar >> /home/pi/log/lookfar.log 2>&1
+</code>
+
+Since it is expect that this datum will be refreshed every 5 minutes, lets change the the expire time from the default of 24 hours to 15 minutes so that we are alerted quite promptly if it stops working:
+
+<code>
+ curl -u "user_name:shared_password" https://lookfar.herokuapp.com/node/pi0/uptime/expire -d "15m"
+</code>
+
+And we are finished.  In Lookfar's UI this will now look something like this:
+
+<code>
+ | node | updated             | key     | value      | threshold | expire | flag
+ | pi0  | 2012-09-15 09:05:02 | uptime  | 208185.41  | -         | 15m    | OK
+</code>
+
+This example assumes that the node for pi0 was already configured.
+A threshold can be defined to trigger when a variable no longer meets expectations.
+The full API is detailed below.
+
+More detailed examples for monitoring backup systems, home automation, etc. can be written up on request.
+
 = Bare minimum example: Monitor a server is online =
 
 Monitoring the uptime of a server requires a small shell script to collect the data and make the request.
@@ -49,62 +88,9 @@ More detailed examples for monitoring backup systems, home automation, etc. can 
 
 = Access control =
 
-Currently Lookfar does not support multi-tenant and a separate install is required for each user.
-There is one password that is used restrict access to the UI and admin functions.
-Each node that submits data has its own password issues by the server that can not be used for any other function.
-
-* Client nodes push data to a server via HTTP POST.
-* Server tracks that the data is kept up to date and remains within expected boundaries.
-* Clients interact via simple HTTP requests and require no special software, just curl (or wget) and crontab.
-* All communication is HTTPS and each node being monitored has its own access credentials.
-* A simple Android application provides warning notifications by polling the API every 15 minutes to check for warnings.
-
-Lookfar is made available under the Apache 2 license.
-
-This README is still work in progress.  Feel free to ask questions.
-
-= Bare minimum example: Monitor a server is online =
-
-Monitoring the uptime of a server requires a small shell script to collect the data and make the request.
-For example, on a node called 'pi0' you could have:
-
-<code>
- #!/bin/bash
- set -eu
- DATA="uptime=$(cat /proc/uptime | cut -d ' ' -f 1)"
- curl -d "$DATA" -u "pi0:1234567890abcdefghijklmno" "https://lookfar.herokuapp.com/update/pi0"
-</code>
-
-The can them be scheduled to run every 5 minutes in crontab:
-
-<code>
- */5 * * * * /home/pi/bin/lookfar >> /home/pi/log/lookfar.log 2>&1
-</code>
-
-Since it is expect that this datum will be refreshed every 5 minutes, lets change the the expire time from the default of 24 hours to 15 minutes so that we are alerted quite promptly if it stops working:
-
-<code>
- curl -u "user_name:shared_password" https://lookfar.herokuapp.com/node/pi0/uptime/expire -d "15m"
-</code>
-
-And we are finished.  In Lookfar's UI this will now look something like this:
-
-<code>
- | node | updated             | key     | value      | threshold | expire | flag
- | pi0  | 2012-09-15 09:05:02 | uptime  | 208185.41  | -         | 15m    | OK
-</code>
-
-This example assumes that the node for pi0 was already configured.
-A threshold can be defined to trigger when a variable no longer meets expectations.
-The full API is detailed below.
-
-More detailed examples for monitoring backup systems, home automation, etc. can be written up on request.
-
-= Access control =
-
-Currently Lookfar does not support multi-tenant and a separate install is required for each user.
-There is one password that is used restrict access to the UI and admin functions.
-Each node that submits data has its own password issues by the server that can not be used for any other function.
+* Currently Lookfar does not support multi-tenant and a separate install is required for each user.
+* There is one password that is used restrict access to the UI and admin functions.
+* Each node that submits data has its own password issues by the server that can not be used for any other function.
 
 = Install =
 
@@ -126,21 +112,12 @@ Environment variables can be set in $HOME/.lookfar and this file will be read in
 == Database schema ==
 
 Postgresql is required to store the last value of each datum and the associated expire time and threshold.
-<<<<<<< HEAD
 
 <code>
  create table nodes (node VARCHAR(16), updated TIMESTAMP, pass VARCHAR(96));
  create table updates (node VARCHAR(16), updated TIMESTAMP, key VARCHAR(255), value VARCHAR(255), threshold VARCHAR(255), expire VARCHAR(255));
 </code>
 
-=======
-
-<code>
- create table nodes (node VARCHAR(16), updated TIMESTAMP, pass VARCHAR(96));
- create table updates (node VARCHAR(16), updated TIMESTAMP, key VARCHAR(255), value VARCHAR(255), threshold VARCHAR(255), expire VARCHAR(255));
-</code>
-
->>>>>>> 9ec33207f81d7056a2495840cd8adaf60e2b22a8
 The database connection is configured by setting an environment variable, for example:
 
 <code>
