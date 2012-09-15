@@ -1,6 +1,6 @@
-= Lookfar =
-
 [[Image:https://secure.travis-ci.org/haku/Lookfar.png|link=http://travis-ci.org/haku/Lookfar]]
+
+= Lookfar =
 
 A light-weight HTTP-based monitoring application.
 
