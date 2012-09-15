@@ -2,46 +2,138 @@
 
 A light-weight HTTP-based monitoring application.
 
+* Client nodes push data to a server via HTTP POST.
+* Server tracks that the data is kept up to date and remains within expected boundaries.
+* Clients interact via simple HTTP requests and require no special software, just curl (or wget) and crontab.
+* All communication is HTTPS and each node being monitored has its own access credentials.
+* A simple Android application provides warning notifications by polling the API every 15 minutes to check for warnings.
+
+Lookfar is made available under the Apache 2 license.
+
+This README is still work in progress.  Feel free to ask questions.
+
+= Bare minimum example: Monitor a server is online =
+
+Monitoring the uptime of a server requires a small shell script to collect the data and make the request.
+For example, on a node called 'pi0' you could have:
+
+<code>
+ #!/bin/bash
+ set -eu
+ DATA="uptime=$(cat /proc/uptime | cut -d ' ' -f 1)"
+ curl -d "$DATA" -u "pi0:1234567890abcdefghijklmno" "https://lookfar.herokuapp.com/update/pi0"
+</code>
+
+The can them be scheduled to run every 5 minutes in crontab:
+
+<code>
+ */5 * * * * /home/pi/bin/lookfar >> /home/pi/log/lookfar.log 2>&1
+</code>
+
+Since it is expect that this datum will be refreshed every 5 minutes, lets change the the expire time from the default of 24 hours to 15 minutes so that we are alerted quite promptly if it stops working:
+
+<code>
+ curl -u "user_name:shared_password" https://lookfar.herokuapp.com/node/pi0/uptime/expire -d "15m"
+</code>
+
+And we are finished.  In Lookfar's UI this will now look something like this:
+
+<code>
+ | node | updated             | key     | value      | threshold | expire | flag
+ | pi0  | 2012-09-15 09:05:02 | uptime  | 208185.41  | -         | 15m    | OK
+</code>
+
+This example assumes that the node for pi0 was already configured.
+A threshold can be defined to trigger when a variable no longer meets expectations.
+The full API is detailed below.
+
+More detailed examples for monitoring backup systems, home automation, etc. can be written up on request.
+
+= Access control =
+
+Currently Lookfar does not support multi-tenant and a separate install is required for each user.
+There is one password that is used restrict access to the UI and admin functions.
+Each node that submits data has its own password issues by the server that can not be used for any other function.
+
 = Install =
+
+The server is a simple Java application with an embedded Jetty HTTP server that deployed most places.
+Lookfar is currently geared towards deploying on Heroku but it is easy to run elsewhere.
+
+== Build and launch ==
+
+A launch script is provided that will trigger the Maven build and then launch the application.
+This requires the Ruby gem 'foreman' to be installed.
+
+The environment variable "PORT" can be set to change the port it will listen on.
+Environment variables can be set in $HOME/.lookfar and this file will be read in on start up.
+
+<code>
+ ./foreman-start
+</code>
 
 == Database schema ==
 
-Postgresql is required.
+Postgresql is required to store the last value of each datum and the associated expire time and threshold.
 
-<code>create table nodes (node VARCHAR(16), updated TIMESTAMP, pass VARCHAR(96));<br>
-create table updates (node VARCHAR(16), updated TIMESTAMP, key VARCHAR(255), value VARCHAR(255), threshold VARCHAR(255), expire VARCHAR(255));</code>
+<code>
+ create table nodes (node VARCHAR(16), updated TIMESTAMP, pass VARCHAR(96));
+ create table updates (node VARCHAR(16), updated TIMESTAMP, key VARCHAR(255), value VARCHAR(255), threshold VARCHAR(255), expire VARCHAR(255));
+</code>
+
+The database connection is configured by setting an environment variable, for example:
+
+<code>
+ DATABASE_URL="postgres://user:password@mydbserver.example.com:5432/mydbname"
+</code>
 
 = UI =
 
-<code><nowiki>curl -u "user_name:shared_password" https://lookfar.herokuapp.com/text</nowiki></code>
+Lookfar has a minimalistic UI that can be used in a browser or on a command line:
+
+<code>
+ curl -u "user_name:shared_password" https://lookfar.herokuapp.com/text
+</code>
 
 = API =
 
 == Nodes ==
 
 List nodes:<br>
-<code><nowiki>curl -u "user_name:shared_password" https://lookfar.herokuapp.com/node</nowiki></code>
+<code>
+ curl -u "user_name:shared_password" https://lookfar.herokuapp.com/node
+</code>
 
 Create a node or reset a node's password:<br>
-<code><nowiki>curl -u "user_name:shared_password" -X PUT https://lookfar.herokuapp.com/node/exampleNode</nowiki></code>
+<code>
+ curl -u "user_name:shared_password" -X PUT https://lookfar.herokuapp.com/node/exampleNode
+</code>
 
 Delete a node:<br>
-<code><nowiki>curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode</nowiki></code>
+<code>
+ curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode
+</code>
 
 == Updates ==
 
 === Managing ===
 
 List all updates:<br>
-<code><nowiki>curl -u "user_name:shared_password" https://lookfar.herokuapp.com/update</nowiki></code>
+<code>
+ curl -u "user_name:shared_password" https://lookfar.herokuapp.com/update
+</code>
 
 Delete an update:<br>
-<code><nowiki>curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1</nowiki></code>
+<code>
+ curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1
+</code>
 
 === Pushing ===
 
 Write an update:<br>
-<code><nowiki>curl -u "exampleNode:node_password" -d "var1=123&var2=456" https://lookfar.herokuapp.com/update/exampleNode</nowiki></code>
+<code>
+ curl -u "exampleNode:node_password" -d "var1=123&var2=456" https://lookfar.herokuapp.com/update/exampleNode
+</code>
 
 == Expire periods ==
 
@@ -50,10 +142,14 @@ Default expire period is 1d.  Set custom expire times using strings like <code>1
 === Setting ===
 
 Set a custom period:<br>
-<code><nowiki>curl -u "user_name:shared_password" -d "1h" https://lookfar.herokuapp.com/node/exampleNode/var1/expire</nowiki></code>
+<code>
+ curl -u "user_name:shared_password" -d "1h" https://lookfar.herokuapp.com/node/exampleNode/var1/expire
+</code>
 
 Clear a custom period (reverts to default):<br>
-<code><nowiki>curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1/expire</nowiki></code>
+<code>
+ curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1/expire
+</code>
 
 == Thresholds ==
 
@@ -78,10 +174,14 @@ A rule is what the value should be.  Breaking the rule triggers a warning.
 === Setting ===
 
 Set a threshold:<br>
-<code><nowiki>curl -u "user_name:shared_password" -d "==0" https://lookfar.herokuapp.com/node/exampleNode/var1/threshold</nowiki></code>
+<code>
+ curl -u "user_name:shared_password" -d "==0" https://lookfar.herokuapp.com/node/exampleNode/var1/threshold
+</code>
 
 Clear a threshold:<br>
-<code><nowiki>curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1/threshold</nowiki></code>
+<code>
+ curl -u "user_name:shared_password" -X DELETE https://lookfar.herokuapp.com/node/exampleNode/var1/threshold
+</code>
 
 == Summary of context paths ==
 
