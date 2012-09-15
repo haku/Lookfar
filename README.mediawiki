@@ -155,7 +155,12 @@ Delete a node:<br>
 
 === Managing ===
 
-List all updates:<br>
+List all updates in text format:<br>
+<code>
+ curl -u "user_name:shared_password" https://lookfar.herokuapp.com/text
+</code>
+
+List all updates in JSON format:<br>
 <code>
  curl -u "user_name:shared_password" https://lookfar.herokuapp.com/update
 </code>
