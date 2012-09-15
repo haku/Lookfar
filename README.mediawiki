@@ -1,11 +1,12 @@
 = Lookfar =
 
 A light-weight HTTP-based monitoring application.
-Client nodes being monitored push data to a server which checks that the data is kept up to date and remains within expected boundaries.
-Clients interact via simple HTTP requests and require no special software, just curl (or wget) and crontab.
-All communication is HTTPS and each node being monitored has its own access credentials.
 
-A simple Android application provides warning notifications by polling the API every 15 minutes to check for warnings.
+* Client nodes push data to a server via HTTP POST.
+* Server tracks that the data is kept up to date and remains within expected boundaries.
+* Clients interact via simple HTTP requests and require no special software, just curl (or wget) and crontab.
+* All communication is HTTPS and each node being monitored has its own access credentials.
+* A simple Android application provides warning notifications by polling the API every 15 minutes to check for warnings.
 
 Lookfar is made available under the Apache 2 license.
 
@@ -50,7 +51,7 @@ More detailed examples for monitoring backup systems, home automation, etc. can 
 
 Currently Lookfar does not support multi-tenant and a separate install is required for each user.
 There is one password that is used restrict access to the UI and admin functions.
-Each node that submits data has its own password issues by the server that can not be used for any function.
+Each node that submits data has its own password issues by the server that can not be used for any other function.
 
 * Client nodes push data to a server via HTTP POST.
 * Server tracks that the data is kept up to date and remains within expected boundaries.
