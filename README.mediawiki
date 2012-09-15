@@ -206,7 +206,7 @@ A rule is what the value should be.  Breaking the rule triggers a warning.
 |<code>==0</code>
 |Treat value as a string and must equal a string.
 |-
-|<code><45<br>>45<br><=45<br>>=45</code>
+|<code><45</code>, <code>>45</code>, <code><=45</code>, <code>>=45</code>
 |Treat value as a number and compare to a number.
 |-
 |<code><nowiki>=~[0 ]</nowiki></code>
