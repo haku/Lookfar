@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.vaguehope.lookfar.auth.BasicAuthFilter;
 import com.vaguehope.lookfar.auth.HerokoHttpsFilter;
 import com.vaguehope.lookfar.auth.NodePasswd;
+import com.vaguehope.lookfar.auth.PasswdGen;
 import com.vaguehope.lookfar.auth.SharedPasswd;
 import com.vaguehope.lookfar.config.Config;
 import com.vaguehope.lookfar.config.Modes;
@@ -51,10 +52,13 @@ public final class Main {
 		ThresholdParser thresholdParser = new ThresholdParser();
 		ExpireParser expireParser = new ExpireParser();
 		UpdateFactory updateFactory = new UpdateFactory(thresholdParser, expireParser);
-		DataStore dataStore = new DataStore(updateFactory );
+		DataStore dataStore = new DataStore(updateFactory);
+
+		// Dependencies.
+		PasswdGen passwdGen = new PasswdGen();
 
 		// Servlets.
-		ServletContextHandler generalServlets = createGeneralServlets(dataStore);
+		ServletContextHandler generalServlets = createGeneralServlets(dataStore, passwdGen);
 		ServletContextHandler nodeServlets = createNodeServlets(dataStore);
 
 		// Static files on classpath.
@@ -76,7 +80,7 @@ public final class Main {
 		LOG.info("Server ready on port " + port + ".");
 	}
 
-	private static ServletContextHandler createGeneralServlets (DataStore dataStore) {
+	private static ServletContextHandler createGeneralServlets (DataStore dataStore, PasswdGen passwdGen) {
 		ServletContextHandler generalServlets = new ServletContextHandler();
 		generalServlets.setContextPath("/");
 		if (Modes.isSecure()) addFilter(generalServlets, new HerokoHttpsFilter());
@@ -84,7 +88,7 @@ public final class Main {
 		generalServlets.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
 		generalServlets.addServlet(new ServletHolder(new TextServlet(dataStore)), TextServlet.CONTEXT);
 		generalServlets.addServlet(new ServletHolder(new UpdateGetServlet(dataStore)), UpdateGetServlet.CONTEXT);
-		generalServlets.addServlet(new ServletHolder(new NodeServlet(dataStore)), NodeServlet.CONTEXT);
+		generalServlets.addServlet(new ServletHolder(new NodeServlet(dataStore, passwdGen)), NodeServlet.CONTEXT);
 		return generalServlets;
 	}
 

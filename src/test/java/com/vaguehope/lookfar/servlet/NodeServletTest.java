@@ -25,6 +25,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.vaguehope.lookfar.auth.PasswdGen;
 import com.vaguehope.lookfar.expire.ExpireStatus;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.Node;
@@ -35,13 +36,14 @@ import com.vaguehope.lookfar.threshold.ThresholdStatus;
 public class NodeServletTest {
 
 	@Mock private DataStore dataStore;
+	@Mock private PasswdGen passwdGen;
 	private MockHttpServletRequest req;
 	private MockHttpServletResponse resp;
 	private NodeServlet undertest;
 
 	@Before
 	public void before () throws Exception {
-		this.undertest = new NodeServlet(this.dataStore);
+		this.undertest = new NodeServlet(this.dataStore, this.passwdGen);
 		this.req = new MockHttpServletRequest();
 		this.resp = new MockHttpServletResponse();
 	}
@@ -62,9 +64,11 @@ public class NodeServletTest {
 	@Test
 	public void itCreatesNewNodes () throws Exception {
 		this.req.setPathInfo("/my_new_node");
+		when(this.passwdGen.makePasswd()).thenReturn("123abc");
 		this.undertest.doPut(this.req, this.resp);
 		verify(this.dataStore).upsertNode(eq("my_new_node"), startsWith("$2a$"));
 		assertThat(this.resp.getContentAsString(), containsString("my_new_node"));
+		assertThat(this.resp.getContentAsString(), containsString("123abc"));
 		assertEquals(201, this.resp.getStatus());
 	}
 
