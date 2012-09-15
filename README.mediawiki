@@ -1,4 +1,4 @@
-[[Image:https://secure.travis-ci.org/haku/Lookfar.png|link=http://travis-ci.org/haku/Lookfar]]
+[http://travis-ci.org/haku/Lookfar [[Image:https://secure.travis-ci.org/haku/Lookfar.png]]]
 
 = Lookfar =
 
