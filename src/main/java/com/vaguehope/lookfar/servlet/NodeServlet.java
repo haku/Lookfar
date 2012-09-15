@@ -32,9 +32,11 @@ public class NodeServlet extends HttpServlet {
 	private static final Logger LOG = LoggerFactory.getLogger(NodeServlet.class);
 
 	private final DataStore dataStore;
+	private final PasswdGen passwdGen;
 
-	public NodeServlet (DataStore dataStore) {
+	public NodeServlet (DataStore dataStore, PasswdGen passwdGen) {
 		this.dataStore = dataStore;
+		this.passwdGen = passwdGen;
 	}
 
 	@Override
@@ -109,7 +111,7 @@ public class NodeServlet extends HttpServlet {
 		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
-		String pw = PasswdGen.makePasswd();
+		String pw = this.passwdGen.makePasswd();
 		String hashpw = BCrypt.hashpw(pw, BCrypt.gensalt());
 
 		try {
