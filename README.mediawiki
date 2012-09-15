@@ -17,12 +17,10 @@ This README is a work in progress.  Feel free to ask questions.
 Monitoring the uptime of a server requires a small shell script to collect the data and make the request.
 For example, on a node called 'pi0' you could have:
 
-<code>
  #!/bin/bash
  set -eu
  DATA="uptime=$(cat /proc/uptime | cut -d ' ' -f 1)"
  curl -d "$DATA" -u "pi0:1234567890abcdefghijklmno" "https://lookfar.herokuapp.com/update/pi0"
-</code>
 
 The can them be scheduled to run every 5 minutes in crontab:
 
@@ -38,10 +36,10 @@ Since it is expect that this datum will be refreshed every 5 minutes, lets chang
 
 And we are finished.  In Lookfar's UI this will now look something like this:
 
-<code>
+<pre>
  | node | updated             | key     | value      | threshold | expire | flag
  | pi0  | 2012-09-15 09:05:02 | uptime  | 208185.41  | -         | 15m    | OK
-</code>
+</pre>
 
 This example assumes that the node for pi0 was already configured.
 A threshold can be defined to trigger when a variable no longer meets expectations.
