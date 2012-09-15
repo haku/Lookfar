@@ -26,7 +26,7 @@ The can them be scheduled to run every 5 minutes in crontab:
 
  */5 * * * * /home/pi/bin/lookfar >> /home/pi/log/lookfar.log 2>&1
 
-Since it is expect that this datum will be refreshed every 5 minutes, lets change the the expire time from the default of 24 hours to 15 minutes so that we are alerted quite promptly if it stops working:
+Since it is expect that this datum will be refreshed every 5 minutes, lets change the the expire time from the default of 24 hours to 15 minutes (leave room for reboots) so that we are alerted more promptly if it stops working:
 
  curl -u "user_name:shared_password" https://lookfar.example.com/node/pi0/uptime/expire -d "15m"
 
@@ -49,13 +49,14 @@ More detailed examples for monitoring backup systems, home automation, etc. can 
 
 = Install =
 
-The server is a simple Java application with an embedded Jetty HTTP server that deployed most places.
-Lookfar is currently geared towards deploying on Heroku but it is easy to run elsewhere.
+The server is a simple Java application with an embedded Jetty HTTP server that can be deployed to most places.
+Lookfar is currently geared towards deploying on Heroku but it is easy to run elsewhere, just export the SAME environment variables that Heroku would.
+Look far should report any misconfigurations on startup.
 
 == Build and launch ==
 
 A launch script is provided that will trigger the Maven build and then launch the application.
-This requires the Ruby gem 'foreman' to be installed.
+This requires Maven and the Ruby gem 'foreman' to be installed.
 
 The environment variable "PORT" can be set to change the port it will listen on.
 Environment variables can be set in $HOME/.lookfar and this file will be read in on start up.
