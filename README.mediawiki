@@ -53,7 +53,7 @@ More detailed examples for monitoring backup systems, home automation, etc. can 
 
 The server is a simple Java application with an embedded Jetty HTTP server that can be deployed to most places.
 Lookfar is currently geared towards deploying on Heroku but it is easy to run elsewhere, just export the SAME environment variables that Heroku would.
-Look far should report any misconfigurations on startup.
+Lookfar should report any misconfigurations on startup.
 
 == Build and launch ==
 
