@@ -32,6 +32,8 @@ public class UpdateGetServlet extends HttpServlet {
 
 	@Override
 	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		resp.setHeader("Access-Control-Allow-Origin", "*"); // Enable CORS.
+
 		try {
 			List<Update> updates = this.dataStore.getAllUpdates();
 			this.mapper.writeValue(resp.getWriter(), updates);
