@@ -32,7 +32,10 @@ public class UpdateGetServlet extends HttpServlet {
 
 	@Override
 	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.setHeader("Access-Control-Allow-Origin", "*"); // Enable CORS.
+		resp.setHeader("Access-Control-Allow-Origin", "localhost:5000");
+		resp.setHeader("Access-Control-Allow-Headers", "*");
+		resp.setHeader("Access-Control-Allow-Credentials", "true");
+		resp.setHeader("Access-Control-Allow-Methods", "GET");
 
 		try {
 			List<Update> updates = this.dataStore.getAllUpdates();
