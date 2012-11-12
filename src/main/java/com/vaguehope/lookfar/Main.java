@@ -30,6 +30,7 @@ import com.vaguehope.lookfar.servlet.NodeServlet;
 import com.vaguehope.lookfar.servlet.TextServlet;
 import com.vaguehope.lookfar.servlet.UpdateGetServlet;
 import com.vaguehope.lookfar.servlet.UpdatePostServlet;
+import com.vaguehope.lookfar.splunk.Splunk;
 import com.vaguehope.lookfar.threshold.ThresholdParser;
 
 public final class Main {
@@ -53,13 +54,14 @@ public final class Main {
 		ExpireParser expireParser = new ExpireParser();
 		UpdateFactory updateFactory = new UpdateFactory(thresholdParser, expireParser);
 		DataStore dataStore = new DataStore(updateFactory);
+		Splunk splunk = new Splunk();
 
 		// Dependencies.
 		PasswdGen passwdGen = new PasswdGen();
 
 		// Servlets.
 		ServletContextHandler generalServlets = createGeneralServlets(dataStore, passwdGen);
-		ServletContextHandler nodeServlets = createNodeServlets(dataStore);
+		ServletContextHandler nodeServlets = createNodeServlets(dataStore, splunk);
 
 		// Static files on classpath.
 		ResourceHandler resourceHandler = createStaticFilesHandler();
@@ -92,12 +94,12 @@ public final class Main {
 		return generalServlets;
 	}
 
-	private static ServletContextHandler createNodeServlets (DataStore dataStore) {
+	private static ServletContextHandler createNodeServlets (DataStore dataStore, Splunk splunk) {
 		ServletContextHandler nodeServlets = new ServletContextHandler();
 		nodeServlets.setContextPath("/");
 		if (Modes.isSecure()) addFilter(nodeServlets, new HerokoHttpsFilter());
 		addFilter(nodeServlets, new BasicAuthFilter(new NodePasswd(dataStore)));
-		nodeServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore)), UpdatePostServlet.CONTEXT);
+		nodeServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore, splunk)), UpdatePostServlet.CONTEXT);
 		return nodeServlets;
 	}
 

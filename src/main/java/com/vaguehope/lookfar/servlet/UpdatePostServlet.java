@@ -2,7 +2,7 @@ package com.vaguehope.lookfar.servlet;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 import com.vaguehope.lookfar.model.DataStore;
+import com.vaguehope.lookfar.splunk.Splunk;
 import com.vaguehope.lookfar.util.ServletHelper;
 
 public class UpdatePostServlet extends HttpServlet {
@@ -25,9 +26,11 @@ public class UpdatePostServlet extends HttpServlet {
 	private static final Logger LOG = LoggerFactory.getLogger(UpdatePostServlet.class);
 
 	private final DataStore dataStore;
+	private final Splunk splunk;
 
-	public UpdatePostServlet (DataStore dataStore) {
+	public UpdatePostServlet (DataStore dataStore, Splunk splunk) {
 		this.dataStore = dataStore;
+		this.splunk = splunk;
 	}
 
 	@Override
@@ -35,7 +38,7 @@ public class UpdatePostServlet extends HttpServlet {
 		String node = ServletHelper.extractPathElement(req, 1, resp);
 		if (node == null) return;
 
-		HashMap<String, String> data = Maps.newHashMap();
+		Map<String, String> data = Maps.newHashMap();
 		for (Entry<String, String[]> datum : req.getParameterMap().entrySet()) {
 			data.put(datum.getKey(), arrToString(datum.getValue()));
 		}
@@ -45,6 +48,9 @@ public class UpdatePostServlet extends HttpServlet {
 		catch (SQLException e) {
 			LOG.warn("Failed to store data.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to store data: " + e.getMessage());
+		}
+		finally {
+			this.splunk.scheduleUpdate(node, data);
 		}
 	}
 
