@@ -20,7 +20,7 @@ public class QueueReporter implements ReportProvider {
 		r.append("queue:").append(this.queue);
 		try {
 			DeclareOk d = this.chan.queueDeclarePassive(this.queue);
-			r.append(".count=").append(d.getMessageCount()).append(":");
+			r.append(":count=").append(d.getMessageCount()).append(".");
 		}
 		catch (IOException e) {
 			r.append(" unreachable.");
