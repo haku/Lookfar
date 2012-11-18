@@ -25,7 +25,7 @@ class SplunkDirectPut implements Callable<Void> {
 		try {
 			this.splunk.writeUpdate(this.data);
 		}
-		catch (IOException e) {
+		catch (Exception e) {
 			reschedule();
 		}
 		return null;
