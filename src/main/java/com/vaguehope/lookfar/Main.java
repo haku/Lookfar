@@ -31,6 +31,8 @@ import com.vaguehope.lookfar.servlet.TextServlet;
 import com.vaguehope.lookfar.servlet.UpdateGetServlet;
 import com.vaguehope.lookfar.servlet.UpdatePostServlet;
 import com.vaguehope.lookfar.splunk.Splunk;
+import com.vaguehope.lookfar.splunk.SplunkProducer;
+import com.vaguehope.lookfar.splunk.SplunkQueueing;
 import com.vaguehope.lookfar.threshold.ThresholdParser;
 
 public final class Main {
@@ -45,23 +47,25 @@ public final class Main {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	private Main () throws Exception { // NOSONAR Exception is throw by Server.start().
-		// Reporting.
-		Reporter reporter = new Reporter(new JvmReporter());
-		reporter.start();
-
 		// Model.
 		ThresholdParser thresholdParser = new ThresholdParser();
 		ExpireParser expireParser = new ExpireParser();
 		UpdateFactory updateFactory = new UpdateFactory(thresholdParser, expireParser);
 		DataStore dataStore = new DataStore(updateFactory);
 		Splunk splunk = new Splunk();
+		SplunkQueueing splunkQueueing = new SplunkQueueing(splunk);
+		SplunkProducer splunkProducer = splunkQueueing.getSplunkProducer();
+
+		// Reporting.
+		Reporter reporter = new Reporter(new JvmReporter(), splunkQueueing.getSplunkQueueRepoter());
+		reporter.start();
 
 		// Dependencies.
 		PasswdGen passwdGen = new PasswdGen();
 
 		// Servlets.
 		ServletContextHandler generalServlets = createGeneralServlets(dataStore, passwdGen);
-		ServletContextHandler nodeServlets = createNodeServlets(dataStore, splunk);
+		ServletContextHandler nodeServlets = createNodeServlets(dataStore, splunkProducer);
 
 		// Static files on classpath.
 		ResourceHandler resourceHandler = createStaticFilesHandler();
@@ -94,12 +98,12 @@ public final class Main {
 		return generalServlets;
 	}
 
-	private static ServletContextHandler createNodeServlets (DataStore dataStore, Splunk splunk) {
+	private static ServletContextHandler createNodeServlets (DataStore dataStore, SplunkProducer splunkProducer) {
 		ServletContextHandler nodeServlets = new ServletContextHandler();
 		nodeServlets.setContextPath("/");
 		if (Modes.isSecure()) addFilter(nodeServlets, new HerokoHttpsFilter());
 		addFilter(nodeServlets, new BasicAuthFilter(new NodePasswd(dataStore)));
-		nodeServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore, splunk)), UpdatePostServlet.CONTEXT);
+		nodeServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore, splunkProducer)), UpdatePostServlet.CONTEXT);
 		return nodeServlets;
 	}
 
