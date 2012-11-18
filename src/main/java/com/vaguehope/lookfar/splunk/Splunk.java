@@ -11,10 +11,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaguehope.lookfar.reporter.ReportProvider;
 import com.vaguehope.lookfar.util.IoHelper;
 
 public class Splunk {
@@ -24,6 +26,7 @@ public class Splunk {
 
 	private final SocketAddress endpoint;
 	private final ExecutorService ex;
+	private final AtomicInteger updatesWritten = new AtomicInteger();
 
 	public Splunk () throws URISyntaxException {
 		this.endpoint = getEndpoint();
@@ -34,8 +37,21 @@ public class Splunk {
 		return this.endpoint != null;
 	}
 
+	public ReportProvider getSplunkRepoter () {
+		return new ReportProvider() {
+			@Override
+			public void appendReport (StringBuilder r) {
+				r.append(getUpdatesWritten()).append(" Splunk updates written.");
+			}
+		};
+	}
+
 	ExecutorService getExcutor () {
 		return this.ex;
+	}
+
+	int getUpdatesWritten () {
+		return this.updatesWritten.intValue();
 	}
 
 	void writeUpdate (String data) throws IOException {
@@ -46,6 +62,7 @@ public class Splunk {
 			PrintWriter out = new PrintWriter(sock.getOutputStream(), true);
 			out.write(data);
 			out.flush();
+			this.updatesWritten.incrementAndGet();
 		}
 		finally {
 			if (sock != null) IoHelper.closeQuietly(sock);
