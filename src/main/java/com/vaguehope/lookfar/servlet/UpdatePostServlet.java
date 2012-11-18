@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 import com.vaguehope.lookfar.model.DataStore;
-import com.vaguehope.lookfar.splunk.Splunk;
+import com.vaguehope.lookfar.splunk.SplunkProducer;
 import com.vaguehope.lookfar.util.ServletHelper;
 
 public class UpdatePostServlet extends HttpServlet {
@@ -26,11 +26,11 @@ public class UpdatePostServlet extends HttpServlet {
 	private static final Logger LOG = LoggerFactory.getLogger(UpdatePostServlet.class);
 
 	private final DataStore dataStore;
-	private final Splunk splunk;
+	private final SplunkProducer splunkProducer;
 
-	public UpdatePostServlet (DataStore dataStore, Splunk splunk) {
+	public UpdatePostServlet (DataStore dataStore, SplunkProducer splunkProducer) {
 		this.dataStore = dataStore;
-		this.splunk = splunk;
+		this.splunkProducer = splunkProducer;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class UpdatePostServlet extends HttpServlet {
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to store data: " + e.getMessage());
 		}
 		finally {
-			this.splunk.scheduleUpdate(node, data);
+			this.splunkProducer.scheduleUpdate(node, data);
 		}
 	}
 
