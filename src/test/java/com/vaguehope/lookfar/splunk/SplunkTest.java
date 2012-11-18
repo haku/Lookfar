@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,7 +54,7 @@ public class SplunkTest {
 	public void itReadsConfigAndConnectsToRightEndpoint () throws Exception {
 		this.undertest.writeUpdate("example=foo");
 		ArgumentCaptor<SocketAddress> cap = ArgumentCaptor.forClass(SocketAddress.class);
-		verify(this.mockSocket).connect(cap.capture());
+		verify(this.mockSocket).connect(cap.capture(), eq(20000));
 		assertEquals("localhost/127.0.0.1:12345", cap.getValue().toString());
 	}
 
