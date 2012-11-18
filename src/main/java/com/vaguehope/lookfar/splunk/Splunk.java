@@ -19,6 +19,7 @@ import com.vaguehope.lookfar.util.IoHelper;
 
 public class Splunk {
 
+	private static final int CONNECT_TIMEOUT_MILLIS = 20000;
 	private static final Logger LOG = LoggerFactory.getLogger(Splunk.class);
 
 	private final SocketAddress endpoint;
@@ -41,7 +42,7 @@ public class Splunk {
 		Socket sock = null;
 		try {
 			sock = new Socket();
-			sock.connect(this.endpoint);
+			sock.connect(this.endpoint, CONNECT_TIMEOUT_MILLIS);
 			PrintWriter out = new PrintWriter(sock.getOutputStream(), true);
 			out.write(data);
 			out.flush();
