@@ -57,7 +57,7 @@ public class Splunk {
 		for (Entry<String, String> e : data.entrySet()) {
 			s.append(" ").append(e.getKey()).append("=").append("\"").append(e.getValue()).append("\"");
 		}
-		s.append("mtime=\"").append(timeMillis / 1000L).append("\"");
+		s.append(" mtime=\"").append(timeMillis / 1000L).append("\"");
 		s.append("\n");
 		return s.toString();
 	}
