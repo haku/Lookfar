@@ -57,7 +57,7 @@ public final class Main {
 		SplunkProducer splunkProducer = splunkQueueing.getSplunkProducer();
 
 		// Reporting.
-		Reporter reporter = new Reporter(new JvmReporter(), splunkQueueing.getSplunkQueueRepoter());
+		Reporter reporter = new Reporter(new JvmReporter(), splunk.getSplunkRepoter(), splunkQueueing.getSplunkQueueRepoter());
 		reporter.start();
 
 		// Dependencies.
