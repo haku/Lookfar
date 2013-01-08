@@ -50,7 +50,7 @@ public class UpdatePostServlet extends HttpServlet {
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to store data: " + e.getMessage());
 		}
 		finally {
-			this.splunkProducer.scheduleUpdate(node, data);
+			if (this.splunkProducer != null) this.splunkProducer.scheduleUpdate(node, data);
 		}
 	}
 

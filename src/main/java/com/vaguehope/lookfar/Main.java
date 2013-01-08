@@ -30,9 +30,7 @@ import com.vaguehope.lookfar.servlet.NodeServlet;
 import com.vaguehope.lookfar.servlet.TextServlet;
 import com.vaguehope.lookfar.servlet.UpdateGetServlet;
 import com.vaguehope.lookfar.servlet.UpdatePostServlet;
-import com.vaguehope.lookfar.splunk.Splunk;
 import com.vaguehope.lookfar.splunk.SplunkProducer;
-import com.vaguehope.lookfar.splunk.SplunkQueueing;
 import com.vaguehope.lookfar.threshold.ThresholdParser;
 
 public final class Main {
@@ -52,12 +50,12 @@ public final class Main {
 		ExpireParser expireParser = new ExpireParser();
 		UpdateFactory updateFactory = new UpdateFactory(thresholdParser, expireParser);
 		DataStore dataStore = new DataStore(updateFactory);
-		Splunk splunk = new Splunk();
-		SplunkQueueing splunkQueueing = new SplunkQueueing(splunk);
-		SplunkProducer splunkProducer = splunkQueueing.getSplunkProducer();
+		//Splunk splunk = new Splunk();
+		//SplunkQueueing splunkQueueing = new SplunkQueueing(splunk);
+		//SplunkProducer splunkProducer = splunkQueueing.getSplunkProducer();
 
 		// Reporting.
-		Reporter reporter = new Reporter(new JvmReporter(), splunk.getSplunkRepoter(), splunkQueueing.getSplunkQueueRepoter());
+		Reporter reporter = new Reporter(new JvmReporter() /*, splunk.getSplunkRepoter(), splunkQueueing.getSplunkQueueRepoter()*/);
 		reporter.start();
 
 		// Dependencies.
@@ -65,7 +63,7 @@ public final class Main {
 
 		// Servlets.
 		ServletContextHandler generalServlets = createGeneralServlets(dataStore, passwdGen);
-		ServletContextHandler nodeServlets = createNodeServlets(dataStore, splunkProducer);
+		ServletContextHandler nodeServlets = createNodeServlets(dataStore, null /* splunkProducer */);
 
 		// Static files on classpath.
 		ResourceHandler resourceHandler = createStaticFilesHandler();
