@@ -6,4 +6,5 @@ fi
 if [ -n "$PORT" ] ; then
   FOREMAN_OPTS="$FOREMAN_OPTS -p $PORT"
 fi
+export JAVA_OPTS="$JAVA_OPTS -Duser.timezone=UTC"
 mvn clean install && foreman start $FOREMAN_OPTS
