@@ -1,6 +1,5 @@
 package com.vaguehope.lookfar.splunk;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -12,12 +11,10 @@ class SplunkDirectPut implements Callable<Void> {
 
 	private final String data;
 	private final Splunk splunk;
-	private final SplunkProducer splunkProducer;
 
-	public SplunkDirectPut (String data, Splunk splunk, SplunkProducer splunkProducer) {
+	public SplunkDirectPut (final String data, final Splunk splunk) {
 		this.data = data;
 		this.splunk = splunk;
-		this.splunkProducer = splunkProducer;
 	}
 
 	@Override
@@ -25,19 +22,10 @@ class SplunkDirectPut implements Callable<Void> {
 		try {
 			this.splunk.writeUpdate(this.data);
 		}
-		catch (Exception e) {
-			reschedule();
+		catch (Exception e) { // NOSONAR
+			LOG.warn("Failed to send to Splunk: {}", e.getMessage());
 		}
 		return null;
-	}
-
-	private void reschedule () {
-		try {
-			this.splunkProducer.rescheduleUpdate(this.data);
-		}
-		catch (IOException e) {
-			LOG.warn("Failed to reschedule update: {}", e.getMessage());
-		}
 	}
 
 }
