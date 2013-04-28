@@ -15,7 +15,8 @@ public final class DateFormatFactory extends ThreadLocal<DateFormat> {
 		return INSTANCE.get();
 	}
 
-	public static String format (Date date) {
+	public static String format (final Date date) {
+		if (date == null) return null;
 		return getInstance().format(date);
 	}
 
