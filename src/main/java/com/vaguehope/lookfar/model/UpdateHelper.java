@@ -18,13 +18,13 @@ public final class UpdateHelper {
 		throw new AssertionError();
 	}
 
-	public static void printUpdates (Collection<Update> updates, HttpServletResponse resp) throws IOException {
+	public static void printUpdates (final Collection<Update> updates, final HttpServletResponse resp) throws IOException {
 		Table<Integer, String, String> table = TreeBasedTable.create();
 		int i = 0;
 		for (Update u : updates) {
 			Integer row = Integer.valueOf(i++);
 			table.put(row, "node", u.getNode());
-			table.put(row, "updated", DateFormatFactory.format(u.getUpdated()));
+			table.put(row, "updated", u.getUpdated() == null ? NULL : DateFormatFactory.format(u.getUpdated()));
 			table.put(row, "key", String.valueOf(u.getKey()));
 			table.put(row, "value", String.valueOf(u.getValue()));
 			table.put(row, "threshold", u.getThreshold() == null ? NULL : u.getThreshold());
