@@ -10,12 +10,12 @@ public enum UpdateFlag {
 	INVALID,
 	WARNING, ;
 
-	public static UpdateFlag fromThresholdAndExpire (ThresholdStatus t, ExpireStatus e) {
+	public static UpdateFlag fromThresholdAndExpire (final ThresholdStatus t, final ExpireStatus e) {
 		if ((t == ThresholdStatus.UNDEFINED || t == ThresholdStatus.OK)
 				&& (e == ExpireStatus.OK)) return OK;
 		if (e == ExpireStatus.EXPIRED) return EXPIRED;
 		if (t == ThresholdStatus.EXCEEDED) return WARNING;
-		if (t == ThresholdStatus.INVALID || e == ExpireStatus.INVALID) return INVALID;
+		if (t == ThresholdStatus.INVALID) return INVALID;
 		return WARNING;
 	}
 

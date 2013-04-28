@@ -24,9 +24,9 @@ public class ExpireParserTest {
 	}
 
 	@Test
-	public void itTreatsNullsDatesAsInvalid () throws Exception {
+	public void itTreatsNullsDatesAsPending () throws Exception {
 		Expire t = this.undertest.parseExpire("1h");
-		assertEquals(ExpireStatus.INVALID, t.isValid(null));
+		assertEquals(ExpireStatus.PENDING, t.isValid(null));
 	}
 
 	@Test
