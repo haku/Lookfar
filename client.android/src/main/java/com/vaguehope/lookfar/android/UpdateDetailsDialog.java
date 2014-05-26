@@ -52,12 +52,26 @@ public class UpdateDetailsDialog {
 			}
 		});
 
+		((Button) this.llParent.findViewById(R.id.btnThresholdDelete)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick (final View v) {
+				askThresholdDelete();
+			}
+		});
+
 		final Button btnExpire = (Button) this.llParent.findViewById(R.id.btnExpire);
 		btnExpire.setText(update.getExpire());
 		btnExpire.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick (final View v) {
 				askExpire();
+			}
+		});
+
+		((Button) this.llParent.findViewById(R.id.btnExpireDelete)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick (final View v) {
+				askExpireDelete();
 			}
 		});
 	}
@@ -79,11 +93,29 @@ public class UpdateDetailsDialog {
 		});
 	}
 
+	protected void askThresholdDelete () {
+		DialogHelper.askYesNo(this.context, "Delete threshold?", "delete", "cancel", new Runnable() {
+			@Override
+			public void run () {
+				new DeleteThreshold(UpdateDetailsDialog.this.context, UpdateDetailsDialog.this.update).execute();
+			}
+		});
+	}
+
 	protected void askExpire () {
 		DialogHelper.askString(this.context, "Expire:", this.update.getExpire(), false, false, new Listener<String>() {
 			@Override
 			public void onAnswer (final String answer) {
 				new SetExpire(UpdateDetailsDialog.this.context, UpdateDetailsDialog.this.update, answer).execute();
+			}
+		});
+	}
+
+	protected void askExpireDelete () {
+		DialogHelper.askYesNo(this.context, "Delete expire?", "delete", "cancel", new Runnable() {
+			@Override
+			public void run () {
+				new DeleteExpire(UpdateDetailsDialog.this.context, UpdateDetailsDialog.this.update).execute();
 			}
 		});
 	}
@@ -104,6 +136,19 @@ public class UpdateDetailsDialog {
 
 	}
 
+	private static class DeleteThreshold extends ModifyUpdate {
+
+		public DeleteThreshold (final Context context, final Update update) {
+			super(context, update);
+		}
+
+		@Override
+		protected void modifyUpdate (final Client client) throws IOException {
+			client.deleteThreshold(this.update);
+		}
+
+	}
+
 	private static class SetExpire extends ModifyUpdate {
 
 		private final String newExpire;
@@ -116,6 +161,19 @@ public class UpdateDetailsDialog {
 		@Override
 		protected void modifyUpdate (final Client client) throws IOException {
 			client.setExpire(this.update, this.newExpire);
+		}
+
+	}
+
+	private static class DeleteExpire extends ModifyUpdate {
+
+		public DeleteExpire (final Context context, final Update update) {
+			super(context, update);
+		}
+
+		@Override
+		protected void modifyUpdate (final Client client) throws IOException {
+			client.deleteExpire(this.update);
 		}
 
 	}

@@ -23,6 +23,15 @@
 			android:layout_weight="1"
 			android:textSize="14sp" />
 
+		<Button
+			android:id="@+id/btnThresholdDelete"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentLeft="true"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="14sp"
+			android:text="del" />
+
 	</TableRow>
 
 	<TableRow
@@ -41,6 +50,15 @@
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
 			android:textSize="14sp" />
+
+		<Button
+			android:id="@+id/btnExpireDelete"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentLeft="true"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="14sp"
+			android:text="del" />
 
 	</TableRow>
 
