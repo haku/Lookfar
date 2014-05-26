@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -60,6 +61,14 @@ public class MainActivity extends Activity {
 			public void onItemClick (final AdapterView<?> parent, final View view, final int position, final long id) {
 				final Update update = (Update) lvUpdates.getAdapter().getItem(position);
 				UpdateDetailsDialog.show(MainActivity.this, update);
+			}
+		});
+		lvUpdates.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick (final AdapterView<?> parent, final View view, final int position, final long id) {
+				final Update update = (Update) lvUpdates.getAdapter().getItem(position);
+				UpdateDetailsDialog.askDeleteUpdate(MainActivity.this, update);
+				return true;
 			}
 		});
 
