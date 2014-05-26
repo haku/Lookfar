@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -53,6 +55,14 @@ public class MainActivity extends Activity {
 
 	private void wireGui () {
 		final ListView lvUpdates = (ListView) findViewById(R.id.lvUpdates);
+		lvUpdates.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick (final AdapterView<?> parent, final View view, final int position, final long id) {
+				final Update update = (Update) lvUpdates.getAdapter().getItem(position);
+				UpdateDetailsDialog.show(MainActivity.this, update);
+			}
+		});
+
 		final Button btnUpdate = (Button) findViewById(R.id.btnUpdate);
 		btnUpdate.setOnClickListener(new OnClickListener() {
 			@Override
