@@ -59,7 +59,7 @@ public class Update {
 
 	public static Update parseJson (final JSONObject json) throws JSONException {
 		final String node = json.getString("node");
-		final long updated = json.getLong("updated");
+		final long updated = json.optLong("updated");
 		final String key = json.getString("key");
 		final String value = json.getString("value");
 		final String threshold = json.getString("threshold");
