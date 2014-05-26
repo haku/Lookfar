@@ -28,6 +28,17 @@
 		android:text="something" />
 
 	<TextView
+		android:id="@+id/txtUpdated"
+		android:layout_alignParentTop="true"
+		android:layout_toRightOf="@id/txtKey"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="10dip"
+		android:layout_marginTop="3dip"
+		android:textSize="14sp"
+		android:text="10m" />
+
+	<TextView
 		android:id="@+id/txtFlag"
 		android:layout_alignParentTop="true"
 		android:layout_alignParentRight="true"

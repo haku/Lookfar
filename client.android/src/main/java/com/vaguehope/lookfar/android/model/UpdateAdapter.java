@@ -10,6 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.vaguehope.lookfar.android.R;
+import com.vaguehope.lookfar.android.util.TimeHelper;
 
 public class UpdateAdapter extends BaseAdapter {
 
@@ -63,19 +64,22 @@ public class UpdateAdapter extends BaseAdapter {
 		private final TextView node;
 		private final TextView flag;
 		private final TextView key;
+		private final TextView updated;
 		private final TextView value;
 
 		public RowView (final View view) {
 			this((TextView) view.findViewById(R.id.txtNode),
 					(TextView) view.findViewById(R.id.txtFlag),
 					(TextView) view.findViewById(R.id.txtKey),
+					(TextView) view.findViewById(R.id.txtUpdated),
 					(TextView) view.findViewById(R.id.txtValue));
 		}
 
-		public RowView (final TextView node, final TextView flag, final TextView key, final TextView value) {
+		public RowView (final TextView node, final TextView flag, final TextView key, final TextView updated, final TextView value) {
 			this.node = node;
 			this.flag = flag;
 			this.key = key;
+			this.updated = updated;
 			this.value = value;
 		}
 
@@ -83,6 +87,7 @@ public class UpdateAdapter extends BaseAdapter {
 			this.node.setText(item.getNode());
 			this.flag.setText(item.getFlag());
 			this.key.setText(item.getKey());
+			this.updated.setText(TimeHelper.humanTimeSpan(item.getUpdated(), System.currentTimeMillis()));
 			this.value.setText(item.getValue());
 		}
 	}
