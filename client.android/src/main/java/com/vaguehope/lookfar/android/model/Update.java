@@ -57,15 +57,25 @@ public class Update {
 		return parseJson((JSONObject) new JSONTokener(json).nextValue());
 	}
 
-	public static Update parseJson (final JSONObject json) throws JSONException {
-		final String node = json.getString("node");
-		final long updated = json.optLong("updated");
-		final String key = json.getString("key");
-		final String value = json.getString("value");
-		final String threshold = json.getString("threshold");
-		final String expire = json.getString("expire");
-		final String flag = json.getString("flag");
+	public static Update parseJson (final JSONObject json) {
+		final String node = stringOrNull(json, "node");
+		final long updated = longOr0(json, "updated");
+		final String key = stringOrNull(json, "key");
+		final String value = stringOrNull(json, "value");
+		final String threshold = stringOrNull(json, "threshold");
+		final String expire = stringOrNull(json, "expire");
+		final String flag = stringOrNull(json, "flag");
 		return new Update(node, updated, key, value, threshold, expire, flag);
+	}
+
+	private static String stringOrNull(final JSONObject json, final String key) {
+		if (json.isNull(key)) return null;
+		return json.optString(key);
+	}
+
+	private static long longOr0(final JSONObject json, final String key) {
+		if (json.isNull(key)) return 0L;
+		return json.optLong(key);
 	}
 
 }
