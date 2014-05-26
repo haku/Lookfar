@@ -1,8 +1,6 @@
 package com.vaguehope.lookfar.android;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import java.util.List;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -17,9 +15,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 
-import com.vaguehope.lookfar.android.util.FileCreds;
-import com.vaguehope.lookfar.android.util.HttpHelper;
-import com.vaguehope.lookfar.android.util.HttpHelper.HttpCreds;
+import com.vaguehope.lookfar.android.model.Update;
 
 public class UpdateService extends IntentService {
 
@@ -32,10 +28,10 @@ public class UpdateService extends IntentService {
 	}
 
 	@Override
-	protected void onHandleIntent (Intent i) {
+	protected void onHandleIntent (final Intent i) {
 		Log.i(C.TAG, "UpdateService invoked.");
-		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, C.TAG);
+		final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		final WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, C.TAG);
 		wl.acquire();
 		try {
 			if (connectionPresent()) {
@@ -54,40 +50,39 @@ public class UpdateService extends IntentService {
 
 	private void checkUpdates () {
 		try {
-			StringBuilder title = new StringBuilder();
-			StringBuilder msg = new StringBuilder();
+			final StringBuilder title = new StringBuilder();
+			final StringBuilder msg = new StringBuilder();
 			int count = 0;
-			HttpCreds creds = new FileCreds(C.CONFIG_FILE_PATH);
-			String json = HttpHelper.getUrlContent("https://lookfar.herokuapp.com/update", null, creds);
-			JSONArray items = (JSONArray) new JSONTokener(json).nextValue();
-			for (int i = 0; i < items.length(); i++) {
-				JSONObject item = (JSONObject) items.get(i);
-				String flag = item.getString("flag");
+
+			final Client client = new Client();
+			final List<Update> updates = client.fetch();
+			for (final Update item : updates) {
+				final String flag = item.getFlag();
 				if (!"OK".equals(flag)) {
 					count += 1;
-					String node = item.getString("node");
+					final String node = item.getNode();
 					if (title.indexOf(node) < 0) {
 						if (title.length() > 0) title.append(", ");
 						title.append(node);
 					}
 					if (msg.length() > 0) msg.append(", ");
-					msg.append(item.getString("key"));
+					msg.append(item.getKey());
 				}
 			}
 			updateNotification(this, title.toString(), msg.toString(), count);
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			updateNotification(this, "Lookfar update failed", e.getMessage(), 0);
 		}
 	}
 
-	private static void updateNotification (Context context, CharSequence title, CharSequence msg, int count) {
-		NotificationManager notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+	private static void updateNotification (final Context context, final CharSequence title, final CharSequence msg, final int count) {
+		final NotificationManager notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		if (msg != null && msg.length() > 0) {
-			Intent notificationIntent = new Intent(context, MainActivity.class);
-			PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+			final Intent notificationIntent = new Intent(context, MainActivity.class);
+			final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
-			Notification n = new Notification(R.drawable.service_notification, "Lookfar: " + title, System.currentTimeMillis());
+			final Notification n = new Notification(R.drawable.service_notification, "Lookfar: " + title, System.currentTimeMillis());
 			n.flags = Notification.FLAG_AUTO_CANCEL;
 			n.defaults = Notification.DEFAULT_ALL;
 			n.setLatestEventInfo(context, title != null ? title : "Lookfar", msg, contentIntent);
@@ -103,8 +98,8 @@ public class UpdateService extends IntentService {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	private boolean connectionPresent () {
-		ConnectivityManager cMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo netInfo = cMgr.getActiveNetworkInfo();
+		final ConnectivityManager cMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+		final NetworkInfo netInfo = cMgr.getActiveNetworkInfo();
 		if ((netInfo != null) && (netInfo.getState() != null)) {
 			return netInfo.getState().equals(State.CONNECTED);
 		}
