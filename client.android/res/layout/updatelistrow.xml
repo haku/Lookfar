@@ -13,8 +13,7 @@
 		android:layout_height="wrap_content"
 		android:layout_marginLeft="10dip"
 		android:layout_marginTop="3dip"
-		android:textSize="14sp"
-		android:text="sakura" />
+		android:textSize="14sp" />
 
 	<TextView
 		android:id="@+id/txtKey"
@@ -24,8 +23,7 @@
 		android:layout_height="wrap_content"
 		android:layout_marginLeft="10dip"
 		android:layout_marginTop="3dip"
-		android:textSize="14sp"
-		android:text="something" />
+		android:textSize="14sp" />
 
 	<TextView
 		android:id="@+id/txtUpdated"
@@ -35,8 +33,7 @@
 		android:layout_height="wrap_content"
 		android:layout_marginLeft="10dip"
 		android:layout_marginTop="3dip"
-		android:textSize="14sp"
-		android:text="10m" />
+		android:textSize="14sp" />
 
 	<TextView
 		android:id="@+id/txtFlag"
@@ -46,8 +43,7 @@
 		android:layout_height="wrap_content"
 		android:layout_marginRight="10dip"
 		android:layout_marginTop="3dip"
-		android:textSize="16sp"
-		android:text="WARNING" />
+		android:textSize="16sp" />
 
 	<TextView
 		android:id="@+id/txtValue"
@@ -58,7 +54,6 @@
 		android:layout_marginLeft="10dip"
 		android:layout_marginRight="10dip"
 		android:layout_marginTop="3dip"
-		android:textSize="14sp"
-		android:text="some value" />
+		android:textSize="14sp" />
 
 </RelativeLayout>
