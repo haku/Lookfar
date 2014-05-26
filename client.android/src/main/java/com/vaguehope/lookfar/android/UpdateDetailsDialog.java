@@ -1,6 +1,7 @@
 package com.vaguehope.lookfar.android;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -120,6 +121,16 @@ public class UpdateDetailsDialog {
 		});
 	}
 
+	protected static void askDeleteUpdate (final Context context, final Update update) {
+		DialogHelper.askYesNo(context, MessageFormat.format("Delete update {0} / {1}?", update.getNode(), update.getKey()),
+				"delete", "cancel", new Runnable() {
+					@Override
+					public void run () {
+						new DeleteUpdate(context, update).execute();
+					}
+				});
+	}
+
 	private static class SetThrshold extends ModifyUpdate {
 
 		private final String newThreshold;
@@ -174,6 +185,19 @@ public class UpdateDetailsDialog {
 		@Override
 		protected void modifyUpdate (final Client client) throws IOException {
 			client.deleteExpire(this.update);
+		}
+
+	}
+
+	private static class DeleteUpdate extends ModifyUpdate {
+
+		public DeleteUpdate (final Context context, final Update update) {
+			super(context, update);
+		}
+
+		@Override
+		protected void modifyUpdate (final Client client) throws IOException {
+			client.deleteUpdate(this.update);
 		}
 
 	}
