@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingBottom="3dip">
+
+	<TextView
+		android:id="@+id/txtNode"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentLeft="true"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="10dip"
+		android:layout_marginTop="3dip"
+		android:textSize="14sp"
+		android:text="sakura" />
+
+	<TextView
+		android:id="@+id/txtKey"
+		android:layout_alignParentTop="true"
+		android:layout_toRightOf="@id/txtNode"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="10dip"
+		android:layout_marginTop="3dip"
+		android:textSize="14sp"
+		android:text="something" />
+
+	<TextView
+		android:id="@+id/txtFlag"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentRight="true"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginRight="10dip"
+		android:layout_marginTop="3dip"
+		android:textSize="16sp"
+		android:text="WARNING" />
+
+	<TextView
+		android:id="@+id/txtValue"
+		android:layout_alignParentLeft="true"
+		android:layout_below="@id/txtNode"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="10dip"
+		android:layout_marginRight="10dip"
+		android:layout_marginTop="3dip"
+		android:textSize="14sp"
+		android:text="some value" />
+
+</RelativeLayout>
