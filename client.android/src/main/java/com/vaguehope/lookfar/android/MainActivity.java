@@ -7,12 +7,12 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 
 import com.vaguehope.lookfar.android.model.Update;
@@ -24,6 +24,7 @@ import com.vaguehope.lookfar.android.util.Result;
 public class MainActivity extends Activity {
 
 	private static final LogWrapper LOG = new LogWrapper("MA");
+	private ListView lvUpdates;
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //	Life cycle events.
@@ -55,32 +56,41 @@ public class MainActivity extends Activity {
 //	GUI setup and helpers.
 
 	private void wireGui () {
-		final ListView lvUpdates = (ListView) findViewById(R.id.lvUpdates);
-		lvUpdates.setOnItemClickListener(new OnItemClickListener() {
+		this.lvUpdates = (ListView) findViewById(R.id.lvUpdates);
+		this.lvUpdates.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick (final AdapterView<?> parent, final View view, final int position, final long id) {
-				final Update update = (Update) lvUpdates.getAdapter().getItem(position);
+				final Update update = (Update) MainActivity.this.lvUpdates.getAdapter().getItem(position);
 				UpdateDetailsDialog.show(MainActivity.this, update);
 			}
 		});
-		lvUpdates.setOnItemLongClickListener(new OnItemLongClickListener() {
+		this.lvUpdates.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick (final AdapterView<?> parent, final View view, final int position, final long id) {
-				final Update update = (Update) lvUpdates.getAdapter().getItem(position);
+				final Update update = (Update) MainActivity.this.lvUpdates.getAdapter().getItem(position);
 				UpdateDetailsDialog.askDeleteUpdate(MainActivity.this, update);
 				return true;
 			}
 		});
 
-		final Button btnUpdate = (Button) findViewById(R.id.btnUpdate);
-		btnUpdate.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick (final View v) {
-				new FetchUpdates(MainActivity.this, lvUpdates).execute();
-			}
-		});
+		if (this.lvUpdates.getAdapter() == null) new FetchUpdates(MainActivity.this, this.lvUpdates).execute();
+	}
 
-		if (lvUpdates.getAdapter() == null) new FetchUpdates(MainActivity.this, lvUpdates).execute();
+	@Override
+	public boolean onCreateOptionsMenu (final Menu menu) {
+		getMenuInflater().inflate(R.menu.main_activity_actions, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected (final MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.mnuRefresh:
+				new FetchUpdates(MainActivity.this, this.lvUpdates).execute();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
