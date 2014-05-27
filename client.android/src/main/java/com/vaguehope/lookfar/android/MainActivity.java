@@ -79,6 +79,8 @@ public class MainActivity extends Activity {
 				new FetchUpdates(MainActivity.this, lvUpdates).execute();
 			}
 		});
+
+		if (lvUpdates.getAdapter() == null) new FetchUpdates(MainActivity.this, lvUpdates).execute();
 	}
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
