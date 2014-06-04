@@ -1,6 +1,13 @@
 package com.vaguehope.lookfar.android;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.json.JSONException;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -13,9 +20,13 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Builder;
 import android.util.Log;
 
 import com.vaguehope.lookfar.android.model.Update;
+import com.vaguehope.lookfar.android.util.EqualHelper;
+import com.vaguehope.lookfar.android.util.FileHelper;
 
 public class UpdateService extends IntentService {
 
@@ -41,58 +52,97 @@ public class UpdateService extends IntentService {
 				Log.i(C.TAG, "No connection, aborted.");
 			}
 		}
+		catch (final Exception e) {
+			Log.i(C.TAG, "UpdateService failed: " + e);
+			updateNotification(this, "Lookfar update failed", e.getMessage(), 0);
+		}
 		finally {
 			wl.release();
+			Log.i(C.TAG, "UpdateService end.");
 		}
 	}
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	private void checkUpdates () {
-		try {
-			final StringBuilder title = new StringBuilder();
-			final StringBuilder msg = new StringBuilder();
-			int count = 0;
+	private void checkUpdates () throws IOException, JSONException {
+		final String newUpdatesJson = new Client().fetchUnparsed();
+		final Map<String, Update> newUpdates = updatesMap(Client.parseUpdatesJson(newUpdatesJson));
+		final Map<String, Update> prevUpdates = updatesMap(getPreviousUpdates(this));
+		compareUpdatesAndAlert(prevUpdates, newUpdates);
+		putPreviousUpdates(this, newUpdatesJson);
+	}
 
-			final Client client = new Client();
-			final List<Update> updates = client.fetch();
-			for (final Update item : updates) {
-				final String flag = item.getFlag();
-				if (!"OK".equals(flag)) {
-					count += 1;
-					final String node = item.getNode();
-					if (title.indexOf(node) < 0) {
-						if (title.length() > 0) title.append(", ");
-						title.append(node);
-					}
-					if (msg.length() > 0) msg.append(", ");
-					msg.append(item.getKey());
-				}
+	private void compareUpdatesAndAlert (final Map<String, Update> prevUpdates, final Map<String, Update> newUpdates) {
+		final StringBuilder title = new StringBuilder();
+		final StringBuilder msg = new StringBuilder();
+		int count = 0;
+
+		for (final Entry<String, Update> nue : newUpdates.entrySet()) {
+			final Update pu = prevUpdates.get(nue.getKey());
+			if (pu == null) continue;
+			final Update nu = nue.getValue();
+			if ("OK".equals(nu.getFlag())) continue;
+			if (EqualHelper.equal(nu.getFlag(), pu.getFlag())) continue;
+
+			count += 1;
+
+			if (title.indexOf(nu.getNode()) < 0) {
+				if (title.length() > 0) title.append(", ");
+				title.append(nu.getNode());
 			}
-			updateNotification(this, title.toString(), msg.toString(), count);
+
+			if (msg.length() > 0) msg.append(", ");
+			msg.append(nu.getKey());
 		}
-		catch (final Exception e) {
-			updateNotification(this, "Lookfar update failed", e.getMessage(), 0);
+
+		Log.i(C.TAG, String.format("title{%s} msg{%s}.", title, msg));
+		updateNotification(this, title.toString(), msg.toString(), count);
+	}
+
+	private static Map<String, Update> updatesMap (final List<Update> updates) {
+		final Map<String, Update> ret = new HashMap<String, Update>();
+		if (updates != null) for (final Update update : updates) {
+			ret.put(String.format("%s/%s", update.getNode(), update.getKey()), update);
 		}
+		return ret;
 	}
 
 	private static void updateNotification (final Context context, final CharSequence title, final CharSequence msg, final int count) {
-		final NotificationManager notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		final NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		if (msg != null && msg.length() > 0) {
 			final Intent notificationIntent = new Intent(context, MainActivity.class);
 			final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
-			final Notification n = new Notification(R.drawable.service_notification, "Lookfar: " + title, System.currentTimeMillis());
-			n.flags = Notification.FLAG_AUTO_CANCEL;
-			n.defaults = Notification.DEFAULT_ALL;
-			n.setLatestEventInfo(context, title != null ? title : "Lookfar", msg, contentIntent);
-			n.number = count;
-
-			notificationMgr.notify(NOTIFICAITON_ID_ALERT, n);
+			final Builder nb = new NotificationCompat.Builder(context)
+					.setOnlyAlertOnce(true)
+					.setSmallIcon(R.drawable.service_notification)
+					.setTicker("Lookfar" + (title != null ? ": " + title : ""))
+					.setContentTitle(title != null ? title : "Lookfar")
+					.setContentText(msg)
+					.setNumber(count)
+					.setContentIntent(contentIntent)
+					.setAutoCancel(true)
+					.setWhen(System.currentTimeMillis())
+					.setDefaults(Notification.DEFAULT_ALL);
+			nm.notify(NOTIFICAITON_ID_ALERT, nb.build());
 		}
 		else {
-			notificationMgr.cancel(NOTIFICAITON_ID_ALERT);
+			nm.cancel(NOTIFICAITON_ID_ALERT);
 		}
+	}
+
+	private static void putPreviousUpdates (final Context context, final String updatesJson) throws IOException {
+		FileHelper.stringToFile(getLastUpdatesFile(context), updatesJson);
+	}
+
+	private static List<Update> getPreviousUpdates (final Context context) throws IOException, JSONException {
+		final File file = getLastUpdatesFile(context);
+		if (!file.exists()) return null;
+		return Client.parseUpdatesJson(FileHelper.fileToString(file));
+	}
+
+	private static File getLastUpdatesFile (final Context context) {
+		return new File(context.getCacheDir(), "last_updates.json");
 	}
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

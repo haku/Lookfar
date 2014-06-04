@@ -32,13 +32,11 @@ public class Client {
 	}
 
 	public List<Update> fetch () throws IOException, JSONException {
-		final String json = HttpHelper.getUrlContent(MessageFormat.format("https://{0}/update", HOST), this.creds);
-		final JSONArray items = (JSONArray) new JSONTokener(json).nextValue();
-		final List<Update> updates = new ArrayList<Update>();
-		for (int i = 0; i < items.length(); i++) {
-			updates.add(Update.parseJson(items.getJSONObject(i)));
-		}
-		return updates;
+		return parseUpdatesJson(fetchUnparsed());
+	}
+
+	public String fetchUnparsed () throws IOException {
+		return HttpHelper.getUrlContent(MessageFormat.format("https://{0}/update", HOST), this.creds);
 	}
 
 	public void setThrshold (final Update update, final String newThreshold) throws IOException {
@@ -74,6 +72,15 @@ public class Client {
 		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/node/{1}/{2}", HOST, update.getNode(), update.getKey()),
 				VERB_DELETE, null, null, this.creds);
 		LOG.i("DEL %s %s.", update.getNode(), update.getKey());
+	}
+
+	public static List<Update> parseUpdatesJson (final String json) throws JSONException {
+		final JSONArray items = (JSONArray) new JSONTokener(json).nextValue();
+		final List<Update> updates = new ArrayList<Update>();
+		for (int i = 0; i < items.length(); i++) {
+			updates.add(Update.parseJson(items.getJSONObject(i)));
+		}
+		return updates;
 	}
 
 	private static void checkNodeAndKey (final Update update) {

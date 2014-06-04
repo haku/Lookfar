@@ -15,11 +15,11 @@ import android.util.Log;
 public class AlarmReceiver extends BroadcastReceiver {
 
 	@Override
-	public void onReceive (Context context, Intent intent) {
+	public void onReceive (final Context context, final Intent intent) {
 		Log.i(C.TAG, "AlarmReceiver invoked.");
 
-		PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-		WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, C.TAG);
+		final PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+		final WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, C.TAG);
 		wl.acquire(3000);
 
 		context.startService(new Intent(context, UpdateService.class));
@@ -27,18 +27,19 @@ public class AlarmReceiver extends BroadcastReceiver {
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	public static void configureAlarm (Context context) {
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-		PendingIntent i = getPendingIntent(context);
+	public static void configureAlarm (final Context context) {
+		final AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		final PendingIntent i = getPendingIntent(context);
 		am.cancel(i);
 		am.setInexactRepeating(
 				AlarmManager.ELAPSED_REALTIME_WAKEUP,
 				SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(300), // ~ 5 min before first run.
 				AlarmManager.INTERVAL_FIFTEEN_MINUTES,
 				i);
+		Log.i(C.TAG, "Alarm service configured.");
 	}
 
-	private static PendingIntent getPendingIntent (Context context) {
+	private static PendingIntent getPendingIntent (final Context context) {
 		return PendingIntent.getBroadcast(context, 0, new Intent(context, AlarmReceiver.class), 0);
 	}
 
