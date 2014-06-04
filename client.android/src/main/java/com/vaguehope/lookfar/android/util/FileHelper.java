@@ -20,8 +20,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -29,18 +32,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class FileHelper {
-//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	private FileHelper () {
 		throw new AssertionError();
 	}
 
-//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	public static List<String> fileToList (File file) throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(file));
+	public static List<String> fileToList (final File file) throws IOException {
+		final BufferedReader reader = new BufferedReader(new FileReader(file));
 		try {
-			List<String> ret = new ArrayList<String>();
+			final List<String> ret = new ArrayList<String>();
 			String line;
 			while ((line = reader.readLine()) != null) {
 				if (line.length() > 0) ret.add(line);
@@ -55,12 +55,12 @@ public final class FileHelper {
 	/**
 	 * Returns null if file does not exist.
 	 */
-	public static String fileToString (File file) throws IOException {
+	public static String fileToString (final File file) throws IOException {
 		try {
-			FileInputStream stream = new FileInputStream(file);
+			final FileInputStream stream = new FileInputStream(file);
 			try {
-				FileChannel fc = stream.getChannel();
-				MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+				final FileChannel fc = stream.getChannel();
+				final MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
 				/* Instead of using default, pass in a decoder. */
 				return Charset.defaultCharset().decode(bb).toString();
 			}
@@ -68,10 +68,19 @@ public final class FileHelper {
 				stream.close();
 			}
 		}
-		catch (FileNotFoundException e) {
+		catch (final FileNotFoundException e) {
 			return null;
 		}
 	}
 
-//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	public static void stringToFile (final File file, final String string) throws IOException {
+		final Writer out = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+		try {
+			out.write(string);
+		}
+		finally {
+			out.close();
+		}
+	}
+
 }

@@ -35,6 +35,8 @@ public class MainActivity extends Activity {
 
 		setContentView(R.layout.main);
 		wireGui();
+
+		AlarmReceiver.configureAlarm(this);
 	}
 
 	@Override
