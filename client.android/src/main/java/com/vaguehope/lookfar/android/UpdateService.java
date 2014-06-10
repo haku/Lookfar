@@ -2,10 +2,12 @@ package com.vaguehope.lookfar.android;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
 
@@ -31,6 +33,7 @@ import com.vaguehope.lookfar.android.util.FileHelper;
 public class UpdateService extends IntentService {
 
 	private static final int NOTIFICAITON_ID_ALERT = 101;
+	private static final long IGNORE_UPDATES_ERRORS_MAX_DATA_AGE_SECONDS = TimeUnit.HOURS.toSeconds(1);
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -45,11 +48,18 @@ public class UpdateService extends IntentService {
 		final WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, C.TAG);
 		wl.acquire();
 		try {
-			if (connectionPresent()) {
-				checkUpdates();
+			try {
+				if (connectionPresent()) {
+					checkUpdates();
+				}
+				else {
+					Log.i(C.TAG, "No connection, aborted.");
+				}
 			}
-			else {
-				Log.i(C.TAG, "No connection, aborted.");
+			catch (final UnknownHostException e) {
+				final long ageSeconds = getPreviousUpdatesAgeSeconds(this);
+				if (ageSeconds < 1 || ageSeconds > IGNORE_UPDATES_ERRORS_MAX_DATA_AGE_SECONDS) throw e;
+				Log.i(C.TAG, String.format("Ignoring update error as data only %ss old: %s", ageSeconds, e));
 			}
 		}
 		catch (final Exception e) {
@@ -133,6 +143,12 @@ public class UpdateService extends IntentService {
 
 	private static void putPreviousUpdates (final Context context, final String updatesJson) throws IOException {
 		FileHelper.stringToFile(getLastUpdatesFile(context), updatesJson);
+	}
+
+	private static long getPreviousUpdatesAgeSeconds (final Context context) {
+		final File file = getLastUpdatesFile(context);
+		if (!file.exists()) return 0L;
+		return TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - file.lastModified());
 	}
 
 	private static List<Update> getPreviousUpdates (final Context context) throws IOException, JSONException {
