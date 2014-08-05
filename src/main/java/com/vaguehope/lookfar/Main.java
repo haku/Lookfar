@@ -2,6 +2,9 @@ package com.vaguehope.lookfar;
 
 import javax.servlet.Filter;
 
+import org.apache.camel.CamelContext;
+import org.apache.camel.component.rabbitmq.RabbitMQComponent;
+import org.apache.camel.impl.DefaultCamelContext;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -51,6 +54,16 @@ public final class Main {
 		ExpireParser expireParser = new ExpireParser();
 		UpdateFactory updateFactory = new UpdateFactory(thresholdParser, expireParser);
 		DataStore dataStore = new DataStore(updateFactory);
+
+		// Camel.
+		final CamelContext camelCtx = new DefaultCamelContext();
+		camelCtx.addComponent("rabbitmq", new RabbitMQComponent());
+		final LookfarRoutes routes = new LookfarRoutes();
+		camelCtx.addRoutes(routes);
+		camelCtx.start();
+		routes.sendTweet("foobar " + System.currentTimeMillis());
+
+		// Splunk.
 		Splunk splunk = new Splunk();
 		SplunkProducer splunkProducer = new SplunkProducer(splunk);
 
