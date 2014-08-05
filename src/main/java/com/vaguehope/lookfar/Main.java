@@ -36,6 +36,7 @@ import com.vaguehope.lookfar.servlet.UpdatePostServlet;
 import com.vaguehope.lookfar.splunk.Splunk;
 import com.vaguehope.lookfar.splunk.SplunkProducer;
 import com.vaguehope.lookfar.threshold.ThresholdParser;
+import com.vaguehope.lookfar.twitter.TwitterPoster;
 import com.vaguehope.lookfar.twitter.TwitterProducer;
 import com.vaguehope.lookfar.twitter.TwitterRoutes;
 
@@ -58,7 +59,8 @@ public final class Main {
 		DataStore dataStore = new DataStore(updateFactory);
 
 		// Twitter.
-		final TwitterRoutes twitterRoutes = new TwitterRoutes();
+		final TwitterPoster twitterPoster = new TwitterPoster();
+		final TwitterRoutes twitterRoutes = new TwitterRoutes(twitterPoster);
 		final TwitterProducer twitterProducer = new TwitterProducer(dataStore, updateFactory, twitterRoutes);
 
 		// Camel.
@@ -72,7 +74,7 @@ public final class Main {
 		SplunkProducer splunkProducer = new SplunkProducer(splunk);
 
 		// Reporting.
-		Reporter reporter = new Reporter(new JvmReporter(), splunk.getSplunkRepoter());
+		Reporter reporter = new Reporter(new JvmReporter(), twitterProducer.getReporter(), twitterPoster.getReporter(), splunk.getSplunkRepoter());
 		reporter.start();
 
 		// Dependencies.
