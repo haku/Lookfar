@@ -20,12 +20,14 @@ public class TwitterRoutes extends RouteBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TwitterRoutes.class);
 
+	private final TwitterPoster twitterPoster;
 	private final URI cloudAmqpUri;
 
 	private Endpoint tweetsQueueEndpoint;
 	private ProducerTemplate producerTemplate;
 
-	public TwitterRoutes () throws URISyntaxException {
+	public TwitterRoutes (final TwitterPoster twitterPoster) throws URISyntaxException {
+		this.twitterPoster = twitterPoster;
 		final String uriRaw = System.getenv(URL_ENVVAR);
 		if (uriRaw != null) {
 			this.cloudAmqpUri = new URI(uriRaw);
@@ -44,7 +46,7 @@ public class TwitterRoutes extends RouteBuilder {
 		this.producerTemplate = getContext().createProducerTemplate();
 		this.tweetsQueueEndpoint = getContext().getEndpoint(cloudAmqpUriToCamelUri(this.cloudAmqpUri, EXCHANGE_NAME, QUEUE_TWEETS));
 		from(this.tweetsQueueEndpoint)
-				.bean(new TwitterPoster());
+				.bean(this.twitterPoster);
 	}
 
 	public void sendTweet (final String body) {

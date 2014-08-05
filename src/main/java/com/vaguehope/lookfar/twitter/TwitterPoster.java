@@ -1,5 +1,7 @@
 package com.vaguehope.lookfar.twitter;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.camel.Body;
 import org.apache.camel.Consume;
 import org.slf4j.Logger;
@@ -10,15 +12,31 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
+import com.vaguehope.lookfar.reporter.ReportProvider;
+
 public class TwitterPoster  {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TwitterPoster.class);
 
 	private final Twitter twitter;
+	private final AtomicInteger tweetsPosted = new AtomicInteger();
 
 	public TwitterPoster () throws TwitterException {
 		this.twitter = makeTwitterFactory().getInstance();
 		LOG.info("Twitter screen name: {}", this.twitter.getScreenName());
+	}
+
+	public ReportProvider getReporter () {
+		return new ReportProvider() {
+			@Override
+			public void appendReport (final StringBuilder r) {
+				r.append(getTweetsPosted()).append(" tweets posted.");
+			}
+		};
+	}
+
+	protected int getTweetsPosted () {
+		return this.tweetsPosted.get();
 	}
 
 	@Consume
