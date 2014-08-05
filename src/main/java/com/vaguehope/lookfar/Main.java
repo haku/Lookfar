@@ -36,6 +36,8 @@ import com.vaguehope.lookfar.servlet.UpdatePostServlet;
 import com.vaguehope.lookfar.splunk.Splunk;
 import com.vaguehope.lookfar.splunk.SplunkProducer;
 import com.vaguehope.lookfar.threshold.ThresholdParser;
+import com.vaguehope.lookfar.twitter.TwitterProducer;
+import com.vaguehope.lookfar.twitter.TwitterRoutes;
 
 public final class Main {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -55,13 +57,15 @@ public final class Main {
 		UpdateFactory updateFactory = new UpdateFactory(thresholdParser, expireParser);
 		DataStore dataStore = new DataStore(updateFactory);
 
+		// Twitter.
+		final TwitterRoutes twitterRoutes = new TwitterRoutes();
+		final TwitterProducer twitterProducer = new TwitterProducer(dataStore, updateFactory, twitterRoutes);
+
 		// Camel.
 		final CamelContext camelCtx = new DefaultCamelContext();
 		camelCtx.addComponent("rabbitmq", new RabbitMQComponent());
-		final LookfarRoutes routes = new LookfarRoutes();
-		camelCtx.addRoutes(routes);
+		camelCtx.addRoutes(twitterRoutes);
 		camelCtx.start();
-		routes.sendTweet("foobar " + System.currentTimeMillis());
 
 		// Splunk.
 		Splunk splunk = new Splunk();
@@ -76,7 +80,7 @@ public final class Main {
 
 		// Servlets.
 		ServletContextHandler generalServlets = createGeneralServlets(dataStore, passwdGen);
-		ServletContextHandler nodeServlets = createNodeServlets(dataStore, splunkProducer);
+		ServletContextHandler nodeServlets = createNodeServlets(dataStore, twitterProducer, splunkProducer);
 
 		// Static files on classpath.
 		ResourceHandler resourceHandler = createStaticFilesHandler();
@@ -109,12 +113,12 @@ public final class Main {
 		return generalServlets;
 	}
 
-	private static ServletContextHandler createNodeServlets (final DataStore dataStore, final SplunkProducer splunkProducer) {
+	private static ServletContextHandler createNodeServlets (final DataStore dataStore, final TwitterProducer twitterProducer, final SplunkProducer splunkProducer) {
 		ServletContextHandler nodeServlets = new ServletContextHandler();
 		nodeServlets.setContextPath("/");
 		if (Modes.isSecure()) addFilter(nodeServlets, new HerokoHttpsFilter());
 		addFilter(nodeServlets, new BasicAuthFilter(new NodePasswd(dataStore)));
-		nodeServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore, splunkProducer)), UpdatePostServlet.CONTEXT);
+		nodeServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore, twitterProducer, splunkProducer)), UpdatePostServlet.CONTEXT);
 		return nodeServlets;
 	}
 

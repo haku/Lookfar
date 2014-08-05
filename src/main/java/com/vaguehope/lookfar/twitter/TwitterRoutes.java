@@ -1,4 +1,4 @@
-package com.vaguehope.lookfar;
+package com.vaguehope.lookfar.twitter;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -9,24 +9,23 @@ import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaguehope.lookfar.twitter.TwitterPoster;
-
 import twitter4j.TwitterException;
 
-public class LookfarRoutes extends RouteBuilder {
+
+public class TwitterRoutes extends RouteBuilder {
 
 	private static final String URL_ENVVAR = "CLOUDAMQP_URL";
 	private static final String EXCHANGE_NAME = "lookfar";
 	private static final String QUEUE_TWEETS = "tweets";
 
-	private static final Logger LOG = LoggerFactory.getLogger(LookfarRoutes.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TwitterRoutes.class);
 
 	private final URI cloudAmqpUri;
 
 	private Endpoint tweetsQueueEndpoint;
 	private ProducerTemplate producerTemplate;
 
-	public LookfarRoutes () throws URISyntaxException {
+	public TwitterRoutes () throws URISyntaxException {
 		final String uriRaw = System.getenv(URL_ENVVAR);
 		if (uriRaw != null) {
 			this.cloudAmqpUri = new URI(uriRaw);
@@ -43,16 +42,17 @@ public class LookfarRoutes extends RouteBuilder {
 		if (this.cloudAmqpUri == null) return;
 
 		this.producerTemplate = getContext().createProducerTemplate();
-
-		final String tweetsQueueUri = cloudAmqpUriToCamelUri(this.cloudAmqpUri, EXCHANGE_NAME, QUEUE_TWEETS);
-		LOG.info("Connecting to {} ...", tweetsQueueUri);
-		this.tweetsQueueEndpoint = getContext().getEndpoint(tweetsQueueUri);
-
+		this.tweetsQueueEndpoint = getContext().getEndpoint(cloudAmqpUriToCamelUri(this.cloudAmqpUri, EXCHANGE_NAME, QUEUE_TWEETS));
 		from(this.tweetsQueueEndpoint)
 				.bean(new TwitterPoster());
 	}
 
 	public void sendTweet (final String body) {
+		if (this.cloudAmqpUri == null) {
+			LOG.warn("No MQ to tweet via: {}", body);
+			return;
+		}
+
 		this.producerTemplate.sendBody(this.tweetsQueueEndpoint, body);
 	}
 
@@ -65,7 +65,7 @@ public class LookfarRoutes extends RouteBuilder {
 			user = parts.length >= 1 ? parts[0] : null;
 			pass = parts.length >= 2 ? parts[1] : null;
 		}
-		return String.format("rabbitmq://%s:5672/%s?username=%s&password=%s&vhost=%s&routingKey=%s",
+		return String.format("rabbitmq://%s:5672/%s?username=%s&password=%s&vhost=%s&routingKey=%s&threadPoolSize=1",
 				cloudAmqpUri.getHost(), exchangeName,
 				user, pass, cloudAmqpUri.getPath().replaceFirst("^/", ""), queueName);
 	}

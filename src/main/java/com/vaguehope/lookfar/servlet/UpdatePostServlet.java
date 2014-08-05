@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Maps;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.splunk.SplunkProducer;
+import com.vaguehope.lookfar.twitter.TwitterProducer;
 import com.vaguehope.lookfar.util.ServletHelper;
 
 public class UpdatePostServlet extends HttpServlet {
@@ -26,15 +27,17 @@ public class UpdatePostServlet extends HttpServlet {
 	private static final Logger LOG = LoggerFactory.getLogger(UpdatePostServlet.class);
 
 	private final DataStore dataStore;
+	private final TwitterProducer twitterProducer;
 	private final SplunkProducer splunkProducer;
 
-	public UpdatePostServlet (DataStore dataStore, SplunkProducer splunkProducer) {
+	public UpdatePostServlet (final DataStore dataStore, final TwitterProducer twitterProducer, final SplunkProducer splunkProducer) {
 		this.dataStore = dataStore;
+		this.twitterProducer = twitterProducer;
 		this.splunkProducer = splunkProducer;
 	}
 
 	@Override
-	protected void doPost (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doPost (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		String node = ServletHelper.extractPathElement(req, 1, resp);
 		if (node == null) return;
 
@@ -42,6 +45,14 @@ public class UpdatePostServlet extends HttpServlet {
 		for (Entry<String, String[]> datum : req.getParameterMap().entrySet()) {
 			data.put(datum.getKey(), arrToString(datum.getValue()));
 		}
+
+		try {
+			if (this.twitterProducer != null) this.twitterProducer.scheduleUpdate(node, data);
+		}
+		catch (final Exception e) {
+			LOG.warn("Twitter producer fialed.", e);
+		}
+
 		try {
 			this.dataStore.update(node, data);
 		}
@@ -54,7 +65,7 @@ public class UpdatePostServlet extends HttpServlet {
 		}
 	}
 
-	private static String arrToString (String[] arr) {
+	private static String arrToString (final String[] arr) {
 		if (arr == null) return "null";
 		if (arr.length < 1) return "";
 		if (arr.length == 1) return arr[0];
