@@ -16,6 +16,7 @@ import com.vaguehope.lookfar.reporter.ReportProvider;
 
 public class TwitterPoster  {
 
+	private static final int TWITTER_ERROR_CODE_STATUS_IS_A_DUPLICATE = 187;
 	private static final Logger LOG = LoggerFactory.getLogger(TwitterPoster.class);
 
 	private final Twitter twitter;
@@ -42,8 +43,17 @@ public class TwitterPoster  {
 	@Consume
 	public void consume(@Body final String body) throws TwitterException {
 		final String safeBody = body.length() > 140 ? body.substring(0, 140) : body;
-		this.twitter.updateStatus(safeBody);
-		LOG.info("posted: {}.", safeBody);
+		try {
+			this.twitter.updateStatus(safeBody);
+			LOG.info("posted: {}.", safeBody);
+		}
+		catch (final TwitterException te) {
+			if (te.getErrorCode() == TWITTER_ERROR_CODE_STATUS_IS_A_DUPLICATE) {
+				LOG.warn("Failed to post duplicate: {}", body);
+				return;
+			}
+			throw te;
+		}
 	}
 
 	private static TwitterFactory makeTwitterFactory () {
