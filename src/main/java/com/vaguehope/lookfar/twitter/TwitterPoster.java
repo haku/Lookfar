@@ -23,8 +23,9 @@ public class TwitterPoster  {
 
 	@Consume
 	public void consume(@Body final String body) throws TwitterException {
-		this.twitter.updateStatus(body);
-		LOG.info("posted: {}.", body);
+		final String safeBody = body.length() > 140 ? body.substring(0, 140) : body;
+		this.twitter.updateStatus(safeBody);
+		LOG.info("posted: {}.", safeBody);
 	}
 
 	private static TwitterFactory makeTwitterFactory () {
@@ -42,7 +43,7 @@ public class TwitterPoster  {
 	}
 
 	private static String readEnv (final String name) {
-		String val = System.getenv(name);
+		final String val = System.getenv(name);
 		if(val == null || val.length() < 1) throw new IllegalArgumentException("Missing envvar: " + name);
 		return val;
 	}
