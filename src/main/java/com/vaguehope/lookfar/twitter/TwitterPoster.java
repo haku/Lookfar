@@ -46,6 +46,7 @@ public class TwitterPoster  {
 		try {
 			this.twitter.updateStatus(safeBody);
 			LOG.info("posted: {}.", safeBody);
+			this.tweetsPosted.incrementAndGet();
 		}
 		catch (final TwitterException te) {
 			if (te.getErrorCode() == TWITTER_ERROR_CODE_STATUS_IS_A_DUPLICATE) {
