@@ -4,12 +4,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.camel.Endpoint;
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.vaguehope.lookfar.twitter.TwitterPoster;
+
+import twitter4j.TwitterException;
 
 public class LookfarRoutes extends RouteBuilder {
 
@@ -37,7 +39,7 @@ public class LookfarRoutes extends RouteBuilder {
 	}
 
 	@Override
-	public void configure () {
+	public void configure () throws TwitterException {
 		if (this.cloudAmqpUri == null) return;
 
 		this.producerTemplate = getContext().createProducerTemplate();
@@ -47,21 +49,16 @@ public class LookfarRoutes extends RouteBuilder {
 		this.tweetsQueueEndpoint = getContext().getEndpoint(tweetsQueueUri);
 
 		from(this.tweetsQueueEndpoint)
-				.process(new Processor() {
-					@Override
-					public void process (final Exchange exchange) throws Exception {
-						LOG.info("received: {}", exchange);
-					}
-				});
+				.bean(new TwitterPoster());
 	}
 
-	public void sendTweet(final String body) {
+	public void sendTweet (final String body) {
 		this.producerTemplate.sendBody(this.tweetsQueueEndpoint, body);
 	}
 
 	// amqp://abcdefgh:-abcdefghijklmnopqrstuvwxyzabcde@tiger.cloudamqp.com/vruyxkle
 	// rabbitmq://localhost/A
-	private static String cloudAmqpUriToCamelUri(final URI cloudAmqpUri, final String exchangeName, final String queueName) {
+	private static String cloudAmqpUriToCamelUri (final URI cloudAmqpUri, final String exchangeName, final String queueName) {
 		String user = null, pass = null;
 		if (cloudAmqpUri.getUserInfo() != null) {
 			final String[] parts = cloudAmqpUri.getUserInfo().split(":");
