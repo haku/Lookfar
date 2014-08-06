@@ -47,7 +47,7 @@ public class UpdatePostServlet extends HttpServlet {
 		}
 
 		try {
-			if (this.twitterProducer != null) this.twitterProducer.scheduleUpdate(node, data);
+			if (this.twitterProducer != null) this.twitterProducer.onNewRawData(node, data);
 		}
 		catch (final Exception e) {
 			LOG.warn("Twitter producer fialed.", e);

@@ -39,6 +39,7 @@ import com.vaguehope.lookfar.threshold.ThresholdParser;
 import com.vaguehope.lookfar.twitter.TwitterPoster;
 import com.vaguehope.lookfar.twitter.TwitterProducer;
 import com.vaguehope.lookfar.twitter.TwitterRoutes;
+import com.vaguehope.lookfar.twitter.TwitterTimeoutProducer;
 
 public final class Main {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -62,6 +63,7 @@ public final class Main {
 		final TwitterPoster twitterPoster = new TwitterPoster();
 		final TwitterRoutes twitterRoutes = new TwitterRoutes(twitterPoster);
 		final TwitterProducer twitterProducer = new TwitterProducer(dataStore, updateFactory, twitterRoutes);
+		new TwitterTimeoutProducer(dataStore, twitterProducer).spawn();
 
 		// Camel.
 		final CamelContext camelCtx = new DefaultCamelContext();

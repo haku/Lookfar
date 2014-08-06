@@ -1,6 +1,7 @@
 package com.vaguehope.lookfar.twitter;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -45,29 +46,40 @@ public class TwitterProducer {
 		return this.tweetsProduced.get();
 	}
 
-	public void scheduleUpdate (final String node, final Map<String, String> nextData) throws SQLException {
-		final StringBuilder tweet = new StringBuilder();
-
+	public void onNewRawData (final String node, final Map<String, String> nextRawData) throws SQLException {
 		final List<Update> prevData = this.dataStore.getUpdates(node);
-		for (final Entry<String, String> nextDatum : nextData.entrySet()) {
+
+		final List<Update> nextData = new ArrayList<Update>();
+		for (final Entry<String, String> nextDatum : nextRawData.entrySet()) {
 			final Update prevUpdate = findUpdate(prevData, nextDatum.getKey());
+			if (prevUpdate == null) continue;
+			nextData.add(this.updateFactory.makeUpdate(node, new Date(), nextDatum.getKey(), nextDatum.getValue(), prevUpdate.getThreshold(), prevUpdate.getExpire()));
+		}
+
+		onNewData(node, prevData, nextData);
+	}
+
+	public void onNewData (final String node, final List<Update> prevData, final List<Update> nextData) {
+		StringBuilder tweet = null;
+
+		for (final Update nextUpdate : nextData) {
+			final Update prevUpdate = findUpdate(prevData, nextUpdate.getKey());
 			if (prevUpdate == null) {
-				LOG.warn("No previous update for node={} key={}", node, nextDatum.getKey());
+				LOG.warn("No previous update for node={} key={}", node, nextUpdate.getKey());
 				continue;
 			}
 
-			final Update nextUpdate = this.updateFactory.makeUpdate(node, new Date(), nextDatum.getKey(), nextDatum.getValue(), prevUpdate.getThreshold(), prevUpdate.getExpire());
 			final UpdateFlag nextFlag = nextUpdate.calculateFlag();
 			if (nextFlag == UpdateFlag.OK) continue;
 
 			final UpdateFlag prevFlag = prevUpdate.calculateFlag();
 			if (nextFlag == prevFlag) continue;
 
-			if (tweet.length() < 1) tweet.append(node);
+			if (tweet == null) tweet = new StringBuilder(node);
 			tweet.append(String.format(" | %s=%s %s --> %s", nextUpdate.getKey(), nextUpdate.getValue(), prevFlag, nextFlag));
 		}
 
-		if (tweet.length() > 0) {
+		if (tweet != null) {
 			this.lookfarRoutes.sendTweet(tweet.toString());
 			this.tweetsProduced.incrementAndGet();
 		}
