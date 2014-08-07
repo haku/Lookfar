@@ -15,6 +15,6 @@ public interface Config {
 	int SERVER_LOW_RESOURCES_MAX_IDLE_TIME_MS = 5000; // 5 seconds in milliseconds.
 
 	// Updates.
-	long UPDATE_DEFAULT_EXPIRY_AGE_MILLIS = TimeUnit.HOURS.toMillis(24);
+	long UPDATE_DEFAULT_EXPIRY_AGE_MILLIS = TimeUnit.HOURS.toMillis(25);
 
 }
