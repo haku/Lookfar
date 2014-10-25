@@ -33,6 +33,7 @@ import com.vaguehope.lookfar.servlet.NodeServlet;
 import com.vaguehope.lookfar.servlet.TextServlet;
 import com.vaguehope.lookfar.servlet.UpdateGetServlet;
 import com.vaguehope.lookfar.servlet.UpdatePostServlet;
+import com.vaguehope.lookfar.servlet.UpdateTailServlet;
 import com.vaguehope.lookfar.splunk.Splunk;
 import com.vaguehope.lookfar.splunk.SplunkProducer;
 import com.vaguehope.lookfar.threshold.ThresholdParser;
@@ -109,6 +110,7 @@ public final class Main {
 		adminServlets.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
 		adminServlets.addServlet(new ServletHolder(new TextServlet(dataStore)), TextServlet.CONTEXT);
 		adminServlets.addServlet(new ServletHolder(new UpdateGetServlet(dataStore)), UpdateGetServlet.CONTEXT);
+		adminServlets.addServlet(new ServletHolder(new UpdateTailServlet(dataStore)), UpdateTailServlet.CONTEXT);
 		adminServlets.addServlet(new ServletHolder(new NodeServlet(dataStore, passwdGen)), NodeServlet.CONTEXT);
 		return adminServlets;
 	}
