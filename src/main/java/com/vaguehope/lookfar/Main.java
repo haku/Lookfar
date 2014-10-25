@@ -83,43 +83,43 @@ public final class Main {
 		PasswdGen passwdGen = new PasswdGen();
 
 		// Servlets.
-		ServletContextHandler generalServlets = createGeneralServlets(dataStore, passwdGen);
-		ServletContextHandler nodeServlets = createNodeServlets(dataStore, twitterProducer, splunkProducer);
+		ServletContextHandler adminServlets = createAdminServlets(dataStore, passwdGen);
+		ServletContextHandler updateServlets = createUpdateServlets(dataStore, twitterProducer, splunkProducer);
 
 		// Static files on classpath.
 		ResourceHandler resourceHandler = createStaticFilesHandler();
 
 		// Top level handler.
 		HandlerList handler = new HandlerList();
-		handler.setHandlers(new Handler[] { resourceHandler, generalServlets, nodeServlets });
+		handler.setHandlers(new Handler[] { updateServlets, adminServlets, resourceHandler });
 
 		// Start server.
 		this.server = new Server();
-		this.server.setHandler(handler);
 		addHttpConnector(this.server, Integer.parseInt(System.getenv("PORT"))); // Heroko pattern.
+		this.server.setHandler(handler);
 		this.server.start();
 		LOG.info("Server ready on port " + Integer.parseInt(System.getenv("PORT")) + ".");
 	}
 
-	private static ServletContextHandler createGeneralServlets (final DataStore dataStore, final PasswdGen passwdGen) {
-		ServletContextHandler generalServlets = new ServletContextHandler();
-		generalServlets.setContextPath("/");
-		if (Modes.isSecure()) addFilter(generalServlets, new HerokoHttpsFilter());
-		addFilter(generalServlets, new BasicAuthFilter(new SharedPasswd()));
-		generalServlets.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
-		generalServlets.addServlet(new ServletHolder(new TextServlet(dataStore)), TextServlet.CONTEXT);
-		generalServlets.addServlet(new ServletHolder(new UpdateGetServlet(dataStore)), UpdateGetServlet.CONTEXT);
-		generalServlets.addServlet(new ServletHolder(new NodeServlet(dataStore, passwdGen)), NodeServlet.CONTEXT);
-		return generalServlets;
+	private static ServletContextHandler createAdminServlets (final DataStore dataStore, final PasswdGen passwdGen) {
+		ServletContextHandler adminServlets = new ServletContextHandler();
+		adminServlets.setContextPath("/admin");
+		if (Modes.isSecure()) addFilter(adminServlets, new HerokoHttpsFilter());
+		addFilter(adminServlets, new BasicAuthFilter(new SharedPasswd()));
+		adminServlets.addServlet(new ServletHolder(new EchoServlet()), EchoServlet.CONTEXT);
+		adminServlets.addServlet(new ServletHolder(new TextServlet(dataStore)), TextServlet.CONTEXT);
+		adminServlets.addServlet(new ServletHolder(new UpdateGetServlet(dataStore)), UpdateGetServlet.CONTEXT);
+		adminServlets.addServlet(new ServletHolder(new NodeServlet(dataStore, passwdGen)), NodeServlet.CONTEXT);
+		return adminServlets;
 	}
 
-	private static ServletContextHandler createNodeServlets (final DataStore dataStore, final TwitterProducer twitterProducer, final SplunkProducer splunkProducer) {
-		ServletContextHandler nodeServlets = new ServletContextHandler();
-		nodeServlets.setContextPath("/");
-		if (Modes.isSecure()) addFilter(nodeServlets, new HerokoHttpsFilter());
-		addFilter(nodeServlets, new BasicAuthFilter(new NodePasswd(dataStore)));
-		nodeServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore, twitterProducer, splunkProducer)), UpdatePostServlet.CONTEXT);
-		return nodeServlets;
+	private static ServletContextHandler createUpdateServlets (final DataStore dataStore, final TwitterProducer twitterProducer, final SplunkProducer splunkProducer) {
+		ServletContextHandler updateServlets = new ServletContextHandler();
+		updateServlets.setContextPath("/update");
+		if (Modes.isSecure()) addFilter(updateServlets, new HerokoHttpsFilter());
+		addFilter(updateServlets, new BasicAuthFilter(new NodePasswd(dataStore)));
+		updateServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore, twitterProducer, splunkProducer)), UpdatePostServlet.CONTEXT);
+		return updateServlets;
 	}
 
 	private static ResourceHandler createStaticFilesHandler () {
@@ -142,8 +142,7 @@ public final class Main {
 	}
 
 	private static void addFilter (final ServletContextHandler handler, final Filter httpsFilter) {
-		FilterHolder holder = new FilterHolder(httpsFilter);
-		handler.addFilter(holder, "/*", null);
+		handler.addFilter(new FilterHolder(httpsFilter), "/*", null);
 	}
 
 	private void join () throws InterruptedException {
