@@ -11,13 +11,13 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<java.version>1.6</java.version>
+		<java.version>1.7</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<camel.version>2.13.2</camel.version>
-		<twitter4j.version>3.0.5</twitter4j.version>
+		<camel.version>2.14.0</camel.version>
+		<twitter4j.version>4.0.2</twitter4j.version>
 
-		<powermock.version>1.5.5</powermock.version>
+		<powermock.version>1.5.6</powermock.version>
 	</properties>
 
 	<dependencies>
@@ -31,13 +31,13 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>8.1.5.v20120716</version>
+			<version>9.2.3.v20140905</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>17.0</version>
+			<version>18.0</version>
 		</dependency>
 
 		<dependency>
@@ -113,7 +113,7 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>1.9.5</version>
+			<version>1.10.8</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -135,14 +135,14 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>4.0.6.RELEASE</version>
+			<version>4.1.1.RELEASE</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency> <!-- Required by spring-test for LinkedCaseInsensitiveMap -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>4.0.6.RELEASE</version>
+			<version>4.1.1.RELEASE</version>
 			<scope>test</scope>
 		</dependency>
 
