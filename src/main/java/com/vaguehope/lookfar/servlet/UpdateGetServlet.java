@@ -18,7 +18,7 @@ import com.vaguehope.lookfar.model.Update;
 
 public class UpdateGetServlet extends HttpServlet {
 
-	public static final String CONTEXT = "/update";
+	public static final String CONTEXT = "/updates";
 
 	private static final long serialVersionUID = -3725822523022950831L;
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateGetServlet.class);
@@ -26,12 +26,12 @@ public class UpdateGetServlet extends HttpServlet {
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final DataStore dataStore;
 
-	public UpdateGetServlet (DataStore dataStore) {
+	public UpdateGetServlet (final DataStore dataStore) {
 		this.dataStore = dataStore;
 	}
 
 	@Override
-	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doGet (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		resp.setHeader("Access-Control-Allow-Origin", "http://localhost:5000");
 		resp.setHeader("Access-Control-Allow-Headers", "*");
 		resp.setHeader("Access-Control-Allow-Credentials", "true");
