@@ -14,7 +14,12 @@ public class SharedPasswd implements PasswdChecker {
 	}
 
 	@Override
-	public boolean verifyPasswd (HttpServletRequest req, String user, String pass) {
+	public String toString () {
+		return "sharedPasswd{}";
+	}
+
+	@Override
+	public boolean verifyPasswd (final HttpServletRequest req, final String user, final String pass) {
 		return this.passwd.equals(pass);
 	}
 
