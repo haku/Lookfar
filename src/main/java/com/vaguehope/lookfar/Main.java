@@ -7,9 +7,9 @@ import org.apache.camel.component.rabbitmq.RabbitMQComponent;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -93,16 +93,12 @@ public final class Main {
 		HandlerList handler = new HandlerList();
 		handler.setHandlers(new Handler[] { resourceHandler, generalServlets, nodeServlets });
 
-		// Listening connector.
-		int port = Integer.parseInt(System.getenv("PORT")); // Heroko pattern.
-		SelectChannelConnector connector = createHttpConnector(port);
-
 		// Start server.
 		this.server = new Server();
 		this.server.setHandler(handler);
-		this.server.addConnector(connector);
+		addHttpConnector(this.server, Integer.parseInt(System.getenv("PORT"))); // Heroko pattern.
 		this.server.start();
-		LOG.info("Server ready on port " + port + ".");
+		LOG.info("Server ready on port " + Integer.parseInt(System.getenv("PORT")) + ".");
 	}
 
 	private static ServletContextHandler createGeneralServlets (final DataStore dataStore, final PasswdGen passwdGen) {
@@ -138,15 +134,11 @@ public final class Main {
 		return resourceHandler;
 	}
 
-	private static SelectChannelConnector createHttpConnector (final int port) {
-		SelectChannelConnector connector = new SelectChannelConnector();
-		connector.setMaxIdleTime(Config.SERVER_MAX_IDLE_TIME_MS);
-		connector.setAcceptors(Config.SERVER_ACCEPTORS);
-		connector.setStatsOn(false);
-		connector.setLowResourcesConnections(Config.SERVER_LOW_RESOURCES_CONNECTIONS);
-		connector.setLowResourcesMaxIdleTime(Config.SERVER_LOW_RESOURCES_MAX_IDLE_TIME_MS);
+	private static void addHttpConnector (final Server server, final int port) {
+		final ServerConnector connector = new ServerConnector(server);
+		connector.setIdleTimeout(Config.SERVER_IDLE_TIME_MS);
 		connector.setPort(port);
-		return connector;
+		server.addConnector(connector);
 	}
 
 	private static void addFilter (final ServletContextHandler handler, final Filter httpsFilter) {

@@ -63,7 +63,6 @@ public class TwitterPoster  {
 		final String accessToken = readEnv("TWITTER_ACCESS_TOKEN");
 		final String accessSecret = readEnv("TWITTER_ACCESS_SECRET");
 		final ConfigurationBuilder cb = new ConfigurationBuilder()
-				.setUseSSL(true)
 				.setOAuthConsumerKey(consumerKey)
 				.setOAuthConsumerSecret(consumerSecret)
 				.setOAuthAccessToken(accessToken)
