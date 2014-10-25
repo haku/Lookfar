@@ -36,40 +36,40 @@ public class Client {
 	}
 
 	public String fetchUnparsed () throws IOException {
-		return HttpHelper.getUrlContent(MessageFormat.format("https://{0}/update", HOST), this.creds);
+		return HttpHelper.getUrlContent(MessageFormat.format("https://{0}/admin/updates", HOST), this.creds);
 	}
 
 	public void setThrshold (final Update update, final String newThreshold) throws IOException {
 		checkNodeAndKey(update);
-		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/node/{1}/{2}/threshold", HOST, update.getNode(), update.getKey()),
+		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/admin/node/{1}/{2}/threshold", HOST, update.getNode(), update.getKey()),
 				VERB_POST, newThreshold, APPLICATION_FORM_URLENCODED, this.creds);
 		LOG.i("SET %s %s t=%s.", update.getNode(), update.getKey(), newThreshold);
 	}
 
 	public void deleteThreshold (final Update update) throws IOException {
 		checkNodeAndKey(update);
-		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/node/{1}/{2}/threshold", HOST, update.getNode(), update.getKey()),
+		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/admin/node/{1}/{2}/threshold", HOST, update.getNode(), update.getKey()),
 				VERB_DELETE, null, null, this.creds);
 		LOG.i("DEL %s %s t.", update.getNode(), update.getKey());
 	}
 
 	public void setExpire (final Update update, final String newExpire) throws IOException {
 		checkNodeAndKey(update);
-		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/node/{1}/{2}/expire", HOST, update.getNode(), update.getKey()),
+		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/admin/node/{1}/{2}/expire", HOST, update.getNode(), update.getKey()),
 				VERB_POST, newExpire, APPLICATION_FORM_URLENCODED, this.creds);
 		LOG.i("SET %s %s e=%s.", update.getNode(), update.getKey(), newExpire);
 	}
 
 	public void deleteExpire (final Update update) throws IOException {
 		checkNodeAndKey(update);
-		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/node/{1}/{2}/expire", HOST, update.getNode(), update.getKey()),
+		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/admin/node/{1}/{2}/expire", HOST, update.getNode(), update.getKey()),
 				VERB_DELETE, null, null, this.creds);
 		LOG.i("DEL %s %s e.", update.getNode(), update.getKey());
 	}
 
 	public void deleteUpdate (final Update update) throws IOException {
 		checkNodeAndKey(update);
-		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/node/{1}/{2}", HOST, update.getNode(), update.getKey()),
+		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/admin/node/{1}/{2}", HOST, update.getNode(), update.getKey()),
 				VERB_DELETE, null, null, this.creds);
 		LOG.i("DEL %s %s.", update.getNode(), update.getKey());
 	}
