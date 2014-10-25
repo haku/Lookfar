@@ -115,10 +115,10 @@ public final class Main {
 
 	private static ServletContextHandler createUpdateServlets (final DataStore dataStore, final TwitterProducer twitterProducer, final SplunkProducer splunkProducer) {
 		ServletContextHandler updateServlets = new ServletContextHandler();
-		updateServlets.setContextPath("/update");
+		updateServlets.setContextPath(UpdatePostServlet.CONTEXT);
 		if (Modes.isSecure()) addFilter(updateServlets, new HerokoHttpsFilter());
 		addFilter(updateServlets, new BasicAuthFilter(new NodePasswd(dataStore)));
-		updateServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore, twitterProducer, splunkProducer)), UpdatePostServlet.CONTEXT);
+		updateServlets.addServlet(new ServletHolder(new UpdatePostServlet(dataStore, twitterProducer, splunkProducer)), "/*");
 		return updateServlets;
 	}
 
