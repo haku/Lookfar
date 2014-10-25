@@ -108,6 +108,10 @@ List all updates in JSON format:<br>
 Delete an update:<br>
  curl -u "user_name:shared_password" -X DELETE https://lookfar.example.com/admin/node/exampleNode/var1
 
+Tail updates via websocket (https://einaros.github.io/ws/):
+ npm install -g ws
+ wscat --auth "user_name:shared_password" -c https://lookfar.example.com/admin/tailupdates
+
 === Pushing ===
 
 Write an update:<br>
