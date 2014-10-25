@@ -26,14 +26,14 @@ public class BasicAuthFilter implements Filter {
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	public BasicAuthFilter (PasswdChecker passwdChecker) {
+	public BasicAuthFilter (final PasswdChecker passwdChecker) {
 		this.passwdChecker = passwdChecker;
 	}
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	@Override
-	public void init (FilterConfig arg0) throws ServletException {
+	public void init (final FilterConfig arg0) throws ServletException {
 		// Unused.
 	}
 
@@ -43,7 +43,7 @@ public class BasicAuthFilter implements Filter {
 	}
 
 	@Override
-	public void doFilter (ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+	public void doFilter (final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse resp = (HttpServletResponse) response;
 
@@ -64,7 +64,8 @@ public class BasicAuthFilter implements Filter {
 		String user = authHeader.substring(0, x);
 		String pass = authHeader.substring(x + 1);
 		if (user == null || pass == null || user.isEmpty() || pass.isEmpty() || !this.passwdChecker.verifyPasswd(req, user, pass)) {
-			LOG.info("Auth failed: for={} uri={} user={} pass={}", new Object[] { req.getHeader("X-Forwarded-For"), req.getRequestURI(), user, pass });
+			LOG.info("Auth failed: for={} uri={} user={} pass={} check={}.",
+					req.getHeader("X-Forwarded-For"), req.getRequestURI(), user, pass, this.passwdChecker);
 			send401(resp);
 			return;
 		}
@@ -74,7 +75,7 @@ public class BasicAuthFilter implements Filter {
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	private static void send401 (HttpServletResponse resp) throws IOException {
+	private static void send401 (final HttpServletResponse resp) throws IOException {
 		resp.setHeader(Http.WWW_AUTHENTICATE, Http.BASIC_REALM);
 		resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		resp.setContentType(Http.CONTENT_TYPE_PLAIN);

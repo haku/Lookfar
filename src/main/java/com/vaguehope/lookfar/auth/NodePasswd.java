@@ -18,8 +18,10 @@ import com.vaguehope.lookfar.util.ServletHelper;
 public class NodePasswd implements PasswdChecker {
 
 	private final LoadingCache<String, String> paswdCache;
+	private final String name;
 
-	public NodePasswd (DataStore dataStore) {
+	public NodePasswd (final DataStore dataStore) {
+		this.name = String.format("nodePasswd{%s}", dataStore);
 		// FIXME Move cache to DataStore so entries expire when modified.
 		this.paswdCache = CacheBuilder.newBuilder()
 				.expireAfterWrite(1, TimeUnit.MINUTES)
@@ -28,15 +30,20 @@ public class NodePasswd implements PasswdChecker {
 	}
 
 	@Override
-	public boolean verifyPasswd (HttpServletRequest req, String user, String pass) throws IOException {
+	public String toString () {
+		return this.name;
+	}
+
+	@Override
+	public boolean verifyPasswd (final HttpServletRequest req, final String user, final String pass) throws IOException {
 		try {
-			String nodeName = ServletHelper.extractPathElement(req, 1);
+			final String nodeName = ServletHelper.extractPathElement(req, 1);
 			if (nodeName == null || !nodeName.equals(user)) return false;
-			String hashpw = this.paswdCache.get(nodeName);
+			final String hashpw = this.paswdCache.get(nodeName);
 			if (hashpw == null) return false;
 			return BCrypt.checkpw(pass, hashpw);
 		}
-		catch (ExecutionException e) {
+		catch (final ExecutionException e) {
 			throw new IOException(e.getMessage(), e);
 		}
 	}
@@ -45,12 +52,12 @@ public class NodePasswd implements PasswdChecker {
 
 		private final DataStore dataStore;
 
-		public PasswdLoader (DataStore dataStore) {
+		public PasswdLoader (final DataStore dataStore) {
 			this.dataStore = dataStore;
 		}
 
 		@Override
-		public String load (String nodeName) throws SQLException {
+		public String load (final String nodeName) throws SQLException {
 			return this.dataStore.getNodeHashpw(nodeName);
 		}
 
