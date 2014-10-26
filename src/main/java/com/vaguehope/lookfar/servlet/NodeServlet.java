@@ -16,11 +16,9 @@ import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 import com.vaguehope.lookfar.auth.PasswdGen;
 import com.vaguehope.lookfar.model.DataStore;
-import com.vaguehope.lookfar.model.Node;
 import com.vaguehope.lookfar.model.Update;
 import com.vaguehope.lookfar.model.UpdateHelper;
 import com.vaguehope.lookfar.util.AsciiTable;
-import com.vaguehope.lookfar.util.DateFormatFactory;
 import com.vaguehope.lookfar.util.ServletHelper;
 import com.vaguehope.lookfar.util.StringHelper;
 
@@ -34,13 +32,13 @@ public class NodeServlet extends HttpServlet {
 	private final DataStore dataStore;
 	private final PasswdGen passwdGen;
 
-	public NodeServlet (DataStore dataStore, PasswdGen passwdGen) {
+	public NodeServlet (final DataStore dataStore, final PasswdGen passwdGen) {
 		this.dataStore = dataStore;
 		this.passwdGen = passwdGen;
 	}
 
 	@Override
-	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doGet (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
 			if (req.getPathInfo() != null && req.getPathInfo().length() > 1) {
 				getNodeValue(req, resp);
@@ -56,16 +54,9 @@ public class NodeServlet extends HttpServlet {
 		}
 	}
 
-	private void getNodes (HttpServletResponse resp) throws IOException, ServletException {
-		Table<Integer, String, String> table = TreeBasedTable.create();
+	private void getNodes (final HttpServletResponse resp) throws IOException, ServletException {
 		try {
-			int i = 0;
-			for (Node u : this.dataStore.getAllNodes()) {
-				Integer row = Integer.valueOf(i++);
-				table.put(row, "node", u.getNode());
-				table.put(row, "updated", DateFormatFactory.format(u.getUpdated()));
-			}
-			AsciiTable.printTable(table, new String[] { "node", "updated" }, resp);
+			AsciiTable.printTable(UpdateHelper.allNodesAsTable(this.dataStore), new String[] { "node", "updated" }, resp);
 		}
 		catch (SQLException e) {
 			LOG.warn("Failed to read data from store.", e);
@@ -73,7 +64,7 @@ public class NodeServlet extends HttpServlet {
 		}
 	}
 
-	private void getNodeValue (HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException {
+	private void getNodeValue (final HttpServletRequest req, final HttpServletResponse resp) throws IOException, SQLException {
 		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
@@ -107,7 +98,7 @@ public class NodeServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doPut (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doPut (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
@@ -131,7 +122,7 @@ public class NodeServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doDelete (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doDelete (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
@@ -158,7 +149,7 @@ public class NodeServlet extends HttpServlet {
 
 	}
 
-	private void deleteNode (HttpServletResponse resp, String nodeName) throws IOException {
+	private void deleteNode (final HttpServletResponse resp, final String nodeName) throws IOException {
 		try {
 			if (this.dataStore.deleteNode(nodeName) < 1) {
 				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to delete node with name '" + nodeName + "'.");
@@ -172,7 +163,7 @@ public class NodeServlet extends HttpServlet {
 		}
 	}
 
-	private void deleteKey (HttpServletResponse resp, String nodeName, String keyName) throws IOException {
+	private void deleteKey (final HttpServletResponse resp, final String nodeName, final String keyName) throws IOException {
 		try {
 			if (this.dataStore.deleteUpdate(nodeName, keyName) < 1) {
 				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to delete key '" + keyName + "' for node '" + nodeName + "'.");
@@ -187,7 +178,7 @@ public class NodeServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doPost (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doPost (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
@@ -211,7 +202,7 @@ public class NodeServlet extends HttpServlet {
 		}
 	}
 
-	private void setThreshold (HttpServletResponse resp, String nodeName, String keyName, String threshold) throws IOException {
+	private void setThreshold (final HttpServletResponse resp, final String nodeName, final String keyName, final String threshold) throws IOException {
 		try {
 			if (this.dataStore.setThreshold(nodeName, keyName, threshold) < 1) {
 				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to write threshold '" + threshold + "' for key '" + keyName + "' for node '" + nodeName + "'.");
@@ -225,7 +216,7 @@ public class NodeServlet extends HttpServlet {
 		}
 	}
 
-	private void setExpire (HttpServletResponse resp, String nodeName, String keyName, String expire) throws IOException {
+	private void setExpire (final HttpServletResponse resp, final String nodeName, final String keyName, final String expire) throws IOException {
 		try {
 			if (this.dataStore.setExpire(nodeName, keyName, expire) < 1) {
 				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to write expire '" + expire + "' for key '" + keyName + "' for node '" + nodeName + "'.");
