@@ -1,9 +1,15 @@
 package com.vaguehope.lookfar.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -18,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.DataUpdateListener;
+import com.vaguehope.lookfar.model.UpdateHelper;
+import com.vaguehope.lookfar.util.AsciiTable;
 
 public class UpdateTailServlet extends WebSocketServlet {
 
@@ -26,9 +34,13 @@ public class UpdateTailServlet extends WebSocketServlet {
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateTailServlet.class);
 	private static final long serialVersionUID = -2680201340985993654L;
 
-	private final SocketMgr socketMgr = new SocketMgr();
+	private final ScheduledExecutorService schEx;
+	private final SocketMgr socketMgr;
 
 	public UpdateTailServlet (final DataStore dataStore) {
+		this.schEx = Executors.newScheduledThreadPool(1);
+		this.socketMgr = new SocketMgr(dataStore);
+		this.schEx.scheduleWithFixedDelay(new EmitPing(this.socketMgr), 10, 10, TimeUnit.SECONDS);
 		dataStore.addListener(this.socketMgr);
 	}
 
@@ -39,9 +51,12 @@ public class UpdateTailServlet extends WebSocketServlet {
 
 	private static class SocketMgr implements WebSocketCreator, DataUpdateListener {
 
+		private final DataStore dataStore;
 		private final Collection<TailSocket> sockets = new CopyOnWriteArraySet<>();
 
-		public SocketMgr () {}
+		public SocketMgr (final DataStore dataStore) {
+			this.dataStore = dataStore;
+		}
 
 		@Override
 		public Object createWebSocket (final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
@@ -52,6 +67,12 @@ public class UpdateTailServlet extends WebSocketServlet {
 		public void onUpdate (final String node, final Map<String, String> data) {
 			for (final TailSocket s : this.sockets) {
 				s.onUpdate(node, data);
+			}
+		}
+
+		public void emitPing () {
+			for (final TailSocket s : this.sockets) {
+				s.emitPing();
 			}
 		}
 
@@ -78,14 +99,64 @@ public class UpdateTailServlet extends WebSocketServlet {
 		}
 
 		@Override
-		public void onUpdate (final String node, final Map<String, String> data) {
+		public void onWebSocketText (final String in) {
 			try {
-				getRemote().sendString(String.format("%s: %s", node, data));
+				if ("ls".equals(in) || "l".equals(in)) {
+					final StringWriter sw = new StringWriter();
+					AsciiTable.printTable(UpdateHelper.allNodesAsTable(this.mgr.dataStore), new String[] { "node", "updated" }, new PrintWriter(sw));
+					sendString(sw.toString());
+				}
+				else {
+					sendString(String.format("unknown: %s", in));
+				}
+			}
+			catch (final SQLException e) {
+				onException(e);
+			}
+		}
+
+		@Override
+		public void onUpdate (final String node, final Map<String, String> data) {
+			sendString(String.format("%s: %s", node, data));
+		}
+
+		public void emitPing () {
+			try {
+				getRemote().sendPing(null);
 			}
 			catch (final IOException e) {
-				LOG.warn("Session can not continue: ", e.toString());
-				getSession().close(StatusCode.SERVER_ERROR, e.getMessage());
+				onException(e);
 			}
+		}
+
+		private void sendString (final String s) {
+			try {
+				getRemote().sendString(s);
+				getRemote().flush();
+			}
+			catch (final IOException e) {
+				onException(e);
+			}
+		}
+
+		private void onException (final Exception e) {
+			LOG.warn("Session can not continue: ", e.toString());
+			getSession().close(StatusCode.SERVER_ERROR, e.getMessage());
+		}
+
+	}
+
+	private static class EmitPing implements Runnable {
+
+		private final SocketMgr socketMgr;
+
+		public EmitPing (final SocketMgr socketMgr) {
+			this.socketMgr = socketMgr;
+		}
+
+		@Override
+		public void run () {
+			this.socketMgr.emitPing();
 		}
 
 	}
