@@ -2,6 +2,9 @@ package com.vaguehope.lookfar.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -39,6 +42,18 @@ public final class StringHelper {
 	public static String toStringOrDefault (final Object s, final String def) {
 		if (s == null) return def;
 		return s.toString();
+	}
+
+	private static final Pattern SEARCH_TERM_SPLIT = Pattern.compile("(?:\\s|　)+");
+
+	public static Queue<String> splitTerms (final String allTerms, final int maxTerms) {
+		final Queue<String> terms = new LinkedList<String>();
+		if (allTerms == null) return terms;
+		for (final String subTerm : SEARCH_TERM_SPLIT.split(allTerms)) {
+			if (subTerm != null && subTerm.length() > 0) terms.add(subTerm);
+			if (terms.size() >= maxTerms) break;
+		}
+		return terms;
 	}
 
 }
