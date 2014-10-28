@@ -31,7 +31,7 @@ public final class UpdateHelper {
 		return table;
 	}
 
-	public static void printUpdates (final Collection<Update> updates, final HttpServletResponse resp) throws IOException {
+	public static Table<Integer, String, String> updatesAsTable (final Collection<Update> updates) {
 		final Table<Integer, String, String> table = TreeBasedTable.create();
 		int i = 0;
 		String lastNode = null;
@@ -56,7 +56,11 @@ public final class UpdateHelper {
 
 			firstOfNode = false;
 		}
-		AsciiTable.printTable(table, new String[] { "node", "updated", "key", "value", "threshold", "expire", "flag" }, resp);
+		return table;
+	}
+
+	public static void printUpdates (final Collection<Update> updates, final HttpServletResponse resp) throws IOException {
+		AsciiTable.printTable(updatesAsTable(updates), new String[] { "node", "updated", "key", "value", "threshold", "expire", "flag" }, resp);
 	}
 
 }

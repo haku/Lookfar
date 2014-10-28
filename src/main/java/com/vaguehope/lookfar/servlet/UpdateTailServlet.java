@@ -5,7 +5,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,10 +25,12 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableMap;
 import com.vaguehope.lookfar.model.DataStore;
 import com.vaguehope.lookfar.model.DataUpdateListener;
 import com.vaguehope.lookfar.model.UpdateHelper;
 import com.vaguehope.lookfar.util.AsciiTable;
+import com.vaguehope.lookfar.util.StringHelper;
 
 public class UpdateTailServlet extends WebSocketServlet {
 
@@ -39,7 +44,7 @@ public class UpdateTailServlet extends WebSocketServlet {
 
 	public UpdateTailServlet (final DataStore dataStore) {
 		this.schEx = Executors.newScheduledThreadPool(1);
-		this.socketMgr = new SocketMgr(dataStore);
+		this.socketMgr = new SocketMgr(dataStore, new CmdInvoker<TailSocket>(Cmds.values(), Cmds.UNKNOWN));
 		this.schEx.scheduleWithFixedDelay(new EmitPing(this.socketMgr), 10, 10, TimeUnit.SECONDS);
 		dataStore.addListener(this.socketMgr);
 	}
@@ -49,13 +54,165 @@ public class UpdateTailServlet extends WebSocketServlet {
 		factory.setCreator(this.socketMgr);
 	}
 
+	private interface Cmd<T> {
+		String arg0 ();
+
+		int argCount ();
+
+		void invoke (T context, String cmd, Queue<String> args) throws Exception;
+	}
+
+	private enum Cmds implements Cmd<TailSocket> {
+		LS("ls") {
+			@Override
+			public void invoke (final TailSocket context, final String cmd, final Queue<String> args) throws SQLException {
+				final StringWriter sw = new StringWriter();
+				AsciiTable.printTable(UpdateHelper.allNodesAsTable(context.getMgr().getDataStore()), new String[] { "node", "updated" }, new PrintWriter(sw));
+				context.sendString(sw.toString());
+			}
+		},
+		L("l", LS),
+		LS_NODE("ls", 1) {
+			@Override
+			public void invoke (final TailSocket context, final String cmd, final Queue<String> args) throws Exception {
+				final StringWriter sw = new StringWriter();
+				AsciiTable.printTable(UpdateHelper.updatesAsTable(context.getMgr().getDataStore().getUpdates(args.poll())),
+						new String[] { "node", "updated", "key", "value", "threshold", "expire", "flag" }, new PrintWriter(sw));
+				context.sendString(sw.toString());
+			}
+		},
+		L_NODE("l", LS_NODE),
+		UNKNOWN {
+			@Override
+			public void invoke (final TailSocket context, final String cmd, final Queue<String> args) throws Exception {
+				context.sendString(String.format("unknown: %s (%s args)", cmd, args.size()));
+			}
+		};
+
+		private final String arg0;
+		private final int argCount;
+		private final Cmd<TailSocket> isAliasOf;
+
+		private Cmds () {
+			this(null);
+		}
+
+		private Cmds (final String arg0) {
+			this(arg0, 0);
+		}
+
+		private Cmds (final String arg0, final int argCount) {
+			this.arg0 = canonicalArg0(arg0);
+			this.argCount = argCount;
+			this.isAliasOf = null;
+		}
+
+		private Cmds (final String arg0, final Cmd<TailSocket> isAliasOf) {
+			this.arg0 = canonicalArg0(arg0);
+			this.argCount = isAliasOf.argCount();
+			this.isAliasOf = isAliasOf;
+		}
+
+		private static String canonicalArg0 (final String arg0) {
+			return arg0 != null ? arg0.toLowerCase(Locale.ENGLISH) : null;
+		}
+
+		@Override
+		public String arg0 () {
+			return this.arg0;
+		}
+
+		@Override
+		public int argCount () {
+			return this.argCount;
+		}
+
+		@Override
+		public void invoke (final TailSocket context, final String cmd, final Queue<String> args) throws Exception {
+			if (this.isAliasOf != null) {
+				this.isAliasOf.invoke(context, cmd, args);
+			}
+			else {
+				throw new UnsupportedOperationException("Not Implemented.");
+			}
+		}
+	}
+
+	private static class CmdInvoker<T> {
+
+		private static class Arg0AndCount {
+			private final String arg0;
+			private final int count;
+
+			public Arg0AndCount (final String arg0, final int count) {
+				this.arg0 = arg0;
+				this.count = count;
+			}
+
+			@Override
+			public int hashCode () {
+				return Objects.hash(this.arg0, this.count);
+			}
+
+			@Override
+			public boolean equals (final Object obj) {
+				if (obj == null) return false;
+				if (obj == this) return true;
+				if (!(obj instanceof Arg0AndCount)) return false;
+				final Arg0AndCount that = (Arg0AndCount) obj;
+				return Objects.equals(this.arg0, that.arg0)
+						&& Objects.equals(this.count, that.count);
+			}
+		}
+
+		private final Map<Arg0AndCount, Cmd<T>> nameToCmd;
+		private final Cmd<T> handleUnknown;
+
+		public CmdInvoker (final Cmd<T>[] cmds, final Cmd<T> handleUnknown) {
+			this.handleUnknown = handleUnknown;
+			final ImmutableMap.Builder<Arg0AndCount, Cmd<T>> cmdsBuilder = new ImmutableMap.Builder<>();
+			for (final Cmd<T> cmd : cmds) {
+				if (cmd.arg0() != null) cmdsBuilder.put(new Arg0AndCount(cmd.arg0(), cmd.argCount()), cmd);
+			}
+			this.nameToCmd = cmdsBuilder.build();
+		}
+
+		public void invoke (final T context, final String rawArg) throws Exception {
+			final Queue<String> args = StringHelper.splitTerms(rawArg, 10);
+			if (args.size() < 1) return;
+			final String arg0 = args.poll();
+			final Cmd<T> cmd = this.nameToCmd.get(new Arg0AndCount(arg0, args.size()));
+			if (cmd != null) {
+				cmd.invoke(context, arg0, args);
+			}
+			else {
+				this.handleUnknown.invoke(context, arg0, args);
+			}
+		}
+
+	}
+
 	private static class SocketMgr implements WebSocketCreator, DataUpdateListener {
 
 		private final DataStore dataStore;
+		private final CmdInvoker<TailSocket> cmdInvoker;
 		private final Collection<TailSocket> sockets = new CopyOnWriteArraySet<>();
 
-		public SocketMgr (final DataStore dataStore) {
+		public SocketMgr (final DataStore dataStore, final CmdInvoker<TailSocket> cmdInvoker) {
 			this.dataStore = dataStore;
+			this.cmdInvoker = cmdInvoker;
+		}
+
+		public DataStore getDataStore () {
+			return this.dataStore;
+		}
+
+		public CmdInvoker<TailSocket> getCmdInvoker () {
+			return this.cmdInvoker;
+		}
+
+		public Collection<TailSocket> getSockets () {
+			return this.sockets;
 		}
 
 		@Override
@@ -86,31 +243,28 @@ public class UpdateTailServlet extends WebSocketServlet {
 			this.mgr = mgr;
 		}
 
+		public SocketMgr getMgr () {
+			return this.mgr;
+		}
+
 		@Override
 		public void onWebSocketConnect (final Session sess) {
 			super.onWebSocketConnect(sess);
-			this.mgr.sockets.add(this);
+			this.mgr.getSockets().add(this);
 		}
 
 		@Override
 		public void onWebSocketClose (final int statusCode, final String reason) {
-			this.mgr.sockets.remove(this);
+			this.mgr.getSockets().remove(this);
 			super.onWebSocketClose(statusCode, reason);
 		}
 
 		@Override
 		public void onWebSocketText (final String in) {
 			try {
-				if ("ls".equals(in) || "l".equals(in)) {
-					final StringWriter sw = new StringWriter();
-					AsciiTable.printTable(UpdateHelper.allNodesAsTable(this.mgr.dataStore), new String[] { "node", "updated" }, new PrintWriter(sw));
-					sendString(sw.toString());
-				}
-				else {
-					sendString(String.format("unknown: %s", in));
-				}
+				this.mgr.getCmdInvoker().invoke(this, in);
 			}
-			catch (final SQLException e) {
+			catch (final Exception e) {
 				onException(e);
 			}
 		}
@@ -129,7 +283,7 @@ public class UpdateTailServlet extends WebSocketServlet {
 			}
 		}
 
-		private void sendString (final String s) {
+		protected void sendString (final String s) {
 			try {
 				getRemote().sendString(s);
 				getRemote().flush();
