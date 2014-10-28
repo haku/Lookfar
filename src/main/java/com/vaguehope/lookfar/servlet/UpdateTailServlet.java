@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
@@ -24,6 +26,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.vaguehope.lookfar.cli.Cmd;
 import com.vaguehope.lookfar.cli.CmdInvoker;
 import com.vaguehope.lookfar.model.DataStore;
@@ -54,7 +57,13 @@ public class UpdateTailServlet extends WebSocketServlet {
 	}
 
 	private enum Cmds implements Cmd<TailSocket> {
-		LS("ls") {
+		HELP("help", "This help text.") {
+			@Override
+			public void invoke (final TailSocket context, final String cmd, final Queue<String> args) throws Exception {
+				context.sendString(context.getMgr().getCmdInvoker().helpText());
+			}
+		},
+		LS("ls", "List nodes.") {
 			@Override
 			public void invoke (final TailSocket context, final String cmd, final Queue<String> args) throws SQLException {
 				final StringWriter sw = new StringWriter();
@@ -63,7 +72,7 @@ public class UpdateTailServlet extends WebSocketServlet {
 			}
 		},
 		L("l", LS),
-		LS_NODE("ls", 1) {
+		LS_NODE("ls", 1, "List node's updates.", "<node>") {
 			@Override
 			public void invoke (final TailSocket context, final String cmd, final Queue<String> args) throws Exception {
 				final StringWriter sw = new StringWriter();
@@ -83,16 +92,20 @@ public class UpdateTailServlet extends WebSocketServlet {
 		private final String arg0;
 		private final int argCount;
 		private final Cmd<TailSocket> isAliasOf;
+		private final List<String> description;
 
 		private Cmds () {
-			this(null);
+			this(null, (String) null);
 		}
 
-		private Cmds (final String arg0) {
-			this(arg0, 0);
+		private Cmds (final String arg0, final String description) {
+			this(arg0, 0, description);
 		}
 
-		private Cmds (final String arg0, final int argCount) {
+		private Cmds (final String arg0, final int argCount, final String... description) {
+			this.description = description != null && description.length > 0 && description[0] != null
+					? ImmutableList.copyOf(description)
+					: Collections.<String> emptyList();
 			this.arg0 = canonicalArg0(arg0);
 			this.argCount = argCount;
 			this.isAliasOf = null;
@@ -102,6 +115,7 @@ public class UpdateTailServlet extends WebSocketServlet {
 			this.arg0 = canonicalArg0(arg0);
 			this.argCount = isAliasOf.argCount();
 			this.isAliasOf = isAliasOf;
+			this.description = isAliasOf.description();
 		}
 
 		private static String canonicalArg0 (final String arg0) {
@@ -116,6 +130,16 @@ public class UpdateTailServlet extends WebSocketServlet {
 		@Override
 		public int argCount () {
 			return this.argCount;
+		}
+
+		@Override
+		public List<String> description () {
+			return this.description;
+		}
+
+		@Override
+		public Cmd<TailSocket> isAliasOf () {
+			return this.isAliasOf;
 		}
 
 		@Override
