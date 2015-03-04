@@ -80,7 +80,7 @@ The database connection is configured by setting an environment variable, for ex
 
 Lookfar has a minimalistic UI that can be used in a browser or on a command line:
 
- curl -u "user_name:shared_password" https://lookfar.example.com/text
+ curl -u "user_name:shared_password" https://lookfar.example.com/admin/text
 
 = API =
 
@@ -100,10 +100,13 @@ Delete a node:<br>
 === Managing ===
 
 List all updates in text format:<br>
- curl -u "user_name:shared_password" https://lookfar.example.com/text
+ curl -u "user_name:shared_password" https://lookfar.example.com/admin/text
 
 List all updates in JSON format:<br>
- curl -u "user_name:shared_password" https://lookfar.example.com/update
+ curl -u "user_name:shared_password" https://lookfar.example.com/admin/updates
+
+Reset an update back to pending:<br>
+ curl -u "user_name:shared_password" -X PUT https://lookfar.example.com/admin/node/exampleNode/var1
 
 Delete an update:<br>
  curl -u "user_name:shared_password" -X DELETE https://lookfar.example.com/admin/node/exampleNode/var1
@@ -175,6 +178,7 @@ Clear a threshold:<br>
    U    PUT /admin/node/<nodeName>
    U DELETE /admin/node/<nodeName>
    U    GET /admin/node/<nodeName>/<keyName>
+   U    PUT /admin/node/<nodeName>/<keyName>
    U DELETE /admin/node/<nodeName>/<keyName>
    U    GET /admin/node/<nodeName>/<keyName>/expire
    U   POST /admin/node/<nodeName>/<keyName>/expire

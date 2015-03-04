@@ -39,17 +39,17 @@ public class DataStore {
 	}
 
 	private static Connection getConnection () throws URISyntaxException, ClassNotFoundException, SQLException {
-		String dbEnv = System.getenv("DATABASE_URL");
+		final String dbEnv = System.getenv("DATABASE_URL");
 		if (dbEnv == null) throw new IllegalStateException("Env var DATABASE_URL not set.");
-		URI dbUri = new URI(dbEnv);
+		final URI dbUri = new URI(dbEnv);
 		String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath();
 		if (Modes.isPostgresSsl()) {
 			dbUrl = dbUrl + "?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory";
 		}
-		String username = dbUri.getUserInfo().split(":")[0];
-		String password = dbUri.getUserInfo().split(":")[1];
+		final String username = dbUri.getUserInfo().split(":")[0];
+		final String password = dbUri.getUserInfo().split(":")[1];
 		Class.forName("org.postgresql.Driver");
-		Connection conn = DriverManager.getConnection(dbUrl, username, password);
+		final Connection conn = DriverManager.getConnection(dbUrl, username, password);
 		LOG.info("Postgres DB connect: {}", dbUrl);
 		return conn;
 	}
@@ -66,14 +66,14 @@ public class DataStore {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	public List<Node> getAllNodes () throws SQLException {
-		List<Node> ret = Lists.newArrayList();
-		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated FROM nodes ORDER BY node");
+		final List<Node> ret = Lists.newArrayList();
+		final PreparedStatement st = this.conn.prepareStatement("SELECT node,updated FROM nodes ORDER BY node");
 		try {
-			ResultSet rs = st.executeQuery();
+			final ResultSet rs = st.executeQuery();
 			try {
 				while (rs.next()) {
-					String node = rs.getString(1);
-					Date updated = timestampToDate(rs.getTimestamp(2));
+					final String node = rs.getString(1);
+					final Date updated = timestampToDate(rs.getTimestamp(2));
 					ret.add(new Node(node, updated));
 				}
 				return ret;
@@ -88,10 +88,10 @@ public class DataStore {
 	}
 
 	public String getNodeHashpw (final String nodeName) throws SQLException {
-		PreparedStatement st = this.conn.prepareStatement("SELECT pass FROM nodes WHERE node=?");
+		final PreparedStatement st = this.conn.prepareStatement("SELECT pass FROM nodes WHERE node=?");
 		try {
 			st.setString(1, nodeName);
-			ResultSet rs = st.executeQuery();
+			final ResultSet rs = st.executeQuery();
 			try {
 				while (rs.next()) {
 					return rs.getString(1);
@@ -108,11 +108,11 @@ public class DataStore {
 	}
 
 	public void upsertNode (final String nodeName, final String hashpw) throws SQLException {
-		PreparedStatement st = this.conn.prepareStatement("UPDATE nodes SET pass=?, updated=now() WHERE node=?");
+		final PreparedStatement st = this.conn.prepareStatement("UPDATE nodes SET pass=?, updated=now() WHERE node=?");
 		try {
 			st.setString(1, hashpw);
 			st.setString(2, nodeName);
-			int rowsUpdates = st.executeUpdate();
+			final int rowsUpdates = st.executeUpdate();
 			if (rowsUpdates < 1) { // FIXME race condition.
 				insertNode(nodeName, hashpw);
 			}
@@ -123,11 +123,11 @@ public class DataStore {
 	}
 
 	private void insertNode (final String nodeName, final String hashpw) throws SQLException {
-		PreparedStatement st = this.conn.prepareStatement("INSERT INTO nodes (node, updated, pass) VALUES (?, now(), ?)");
+		final PreparedStatement st = this.conn.prepareStatement("INSERT INTO nodes (node, updated, pass) VALUES (?, now(), ?)");
 		try {
 			st.setString(1, nodeName);
 			st.setString(2, hashpw);
-			int rowInserted = st.executeUpdate();
+			final int rowInserted = st.executeUpdate();
 			if (rowInserted < 1) {
 				throw new SQLException("Failed to insert into nodes table.  " + rowInserted + " rows updated.");
 			}
@@ -138,7 +138,7 @@ public class DataStore {
 	}
 
 	public int deleteNode (final String nodeName) throws SQLException {
-		PreparedStatement st = this.conn.prepareStatement("DELETE FROM nodes WHERE node=?");
+		final PreparedStatement st = this.conn.prepareStatement("DELETE FROM nodes WHERE node=?");
 		try {
 			st.setString(1, nodeName);
 			return st.executeUpdate();
@@ -151,10 +151,10 @@ public class DataStore {
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	public List<Update> getAllUpdates () throws SQLException {
-		List<Update> ret = Lists.newArrayList();
-		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value,threshold,expire FROM updates ORDER BY node, key");
+		final List<Update> ret = Lists.newArrayList();
+		final PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value,threshold,expire FROM updates ORDER BY node, key");
 		try {
-			ResultSet rs = st.executeQuery();
+			final ResultSet rs = st.executeQuery();
 			try {
 				while (rs.next()) {
 					ret.add(readUpdate(rs));
@@ -171,11 +171,11 @@ public class DataStore {
 	}
 
 	public List<Update> getUpdates (final String nodeName) throws SQLException {
-		List<Update> ret = Lists.newArrayList();
-		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value,threshold,expire FROM updates WHERE node=? ORDER BY node, key");
+		final List<Update> ret = Lists.newArrayList();
+		final PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value,threshold,expire FROM updates WHERE node=? ORDER BY node, key");
 		try {
 			st.setString(1, nodeName);
-			ResultSet rs = st.executeQuery();
+			final ResultSet rs = st.executeQuery();
 			try {
 				while (rs.next()) {
 					ret.add(readUpdate(rs));
@@ -192,11 +192,11 @@ public class DataStore {
 	}
 
 	public Update getUpdate (final String nodeName, final String keyName) throws SQLException {
-		PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value,threshold,expire FROM updates WHERE node=? AND key=?");
+		final PreparedStatement st = this.conn.prepareStatement("SELECT node,updated,key,value,threshold,expire FROM updates WHERE node=? AND key=?");
 		try {
 			st.setString(1, nodeName);
 			st.setString(2, keyName);
-			ResultSet rs = st.executeQuery();
+			final ResultSet rs = st.executeQuery();
 			try {
 				while (rs.next()) {
 					return readUpdate(rs);
@@ -213,23 +213,23 @@ public class DataStore {
 	}
 
 	private Update readUpdate (final ResultSet rs) throws SQLException {
-		String node = rs.getString(1);
-		Date updated = timestampToDate(rs.getTimestamp(2));
-		String key = rs.getString(3);
-		String value = rs.getString(4);
-		String threshold = rs.getString(5);
-		String expire = rs.getString(6);
+		final String node = rs.getString(1);
+		final Date updated = timestampToDate(rs.getTimestamp(2));
+		final String key = rs.getString(3);
+		final String value = rs.getString(4);
+		final String threshold = rs.getString(5);
+		final String expire = rs.getString(6);
 		return this.updateFactory.makeUpdate(node, updated, key, value, threshold, expire);
 	}
 
 	public void update (final String node, final Map<String, String> data) throws SQLException {
-		PreparedStatement stUpdate = this.conn.prepareStatement("UPDATE updates SET value=?, updated=now() WHERE node=? AND key=?");
+		final PreparedStatement stUpdate = this.conn.prepareStatement("UPDATE updates SET value=?, updated=now() WHERE node=? AND key=?");
 		try {
-			for (Entry<String, String> datum : data.entrySet()) {
+			for (final Entry<String, String> datum : data.entrySet()) {
 				stUpdate.setString(1, datum.getValue());
 				stUpdate.setString(2, node);
 				stUpdate.setString(3, datum.getKey());
-				int rowsUpdates = stUpdate.executeUpdate();
+				final int rowsUpdates = stUpdate.executeUpdate();
 				if (rowsUpdates < 1) { // FIXME race condition.
 					insertUpdate(node, datum);
 				}
@@ -242,12 +242,12 @@ public class DataStore {
 	}
 
 	private void insertUpdate (final String node, final Entry<String, String> datum) throws SQLException {
-		PreparedStatement stInsert = this.conn.prepareStatement("INSERT INTO updates (node, updated, key, value) VALUES (?, now(), ?, ?)");
+		final PreparedStatement stInsert = this.conn.prepareStatement("INSERT INTO updates (node, updated, key, value) VALUES (?, now(), ?, ?)");
 		try {
 			stInsert.setString(1, node);
 			stInsert.setString(2, datum.getKey());
 			stInsert.setString(3, datum.getValue());
-			int rowInserted = stInsert.executeUpdate();
+			final int rowInserted = stInsert.executeUpdate();
 			if (rowInserted < 1) {
 				throw new SQLException("Failed to insert into updates table.  " + rowInserted + " rows updated.");
 			}
@@ -257,8 +257,20 @@ public class DataStore {
 		}
 	}
 
+	public int clearUpdateUpdated (final String nodeName, final String keyName) throws SQLException {
+		final PreparedStatement st = this.conn.prepareStatement("UPDATE updates SET updated=null WHERE node=? AND key=?");
+		try {
+			st.setString(1, nodeName);
+			st.setString(2, keyName);
+			return st.executeUpdate();
+		}
+		finally {
+			st.close();
+		}
+	}
+
 	public int deleteUpdate (final String nodeName, final String keyName) throws SQLException {
-		PreparedStatement st = this.conn.prepareStatement("DELETE FROM updates WHERE node=? AND key=?");
+		final PreparedStatement st = this.conn.prepareStatement("DELETE FROM updates WHERE node=? AND key=?");
 		try {
 			st.setString(1, nodeName);
 			st.setString(2, keyName);
@@ -270,7 +282,7 @@ public class DataStore {
 	}
 
 	public int setThreshold (final String nodeName, final String keyName, final String threshold) throws SQLException {
-		PreparedStatement st = this.conn.prepareStatement("UPDATE updates SET threshold=? WHERE node=? AND key=?");
+		final PreparedStatement st = this.conn.prepareStatement("UPDATE updates SET threshold=? WHERE node=? AND key=?");
 		try {
 			st.setString(1, threshold);
 			st.setString(2, nodeName);
@@ -283,7 +295,7 @@ public class DataStore {
 	}
 
 	public int setExpire (final String nodeName, final String keyName, final String expire) throws SQLException {
-		PreparedStatement st = this.conn.prepareStatement("UPDATE updates SET expire=? WHERE node=? AND key=?");
+		final PreparedStatement st = this.conn.prepareStatement("UPDATE updates SET expire=? WHERE node=? AND key=?");
 		try {
 			st.setString(1, expire);
 			st.setString(2, nodeName);
