@@ -22,6 +22,7 @@ public class Client {
 
 	private static final String HOST = "lookfar.herokuapp.com";
 	private static final String VERB_POST = "POST";
+	private static final String VERB_PUT = "PUT";
 	private static final String VERB_DELETE = "DELETE";
 	private static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded.";
 
@@ -65,6 +66,13 @@ public class Client {
 		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/admin/node/{1}/{2}/expire", HOST, update.getNode(), update.getKey()),
 				VERB_DELETE, null, null, this.creds);
 		LOG.i("DEL %s %s e.", update.getNode(), update.getKey());
+	}
+
+	public void clearUpdateUpdated (final Update update) throws IOException {
+		checkNodeAndKey(update);
+		HttpHelper.getUrlContent(MessageFormat.format("https://{0}/admin/node/{1}/{2}", HOST, update.getNode(), update.getKey()),
+				VERB_PUT, null, null, this.creds);
+		LOG.i("PUT %s %s.", update.getNode(), update.getKey());
 	}
 
 	public void deleteUpdate (final Update update) throws IOException {

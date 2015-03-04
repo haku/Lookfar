@@ -75,6 +75,13 @@ public class UpdateDetailsDialog {
 				askExpireDelete();
 			}
 		});
+
+		((Button) this.llParent.findViewById(R.id.btnReset)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick (final View v) {
+				askClearUpdateUpdated();
+			}
+		});
 	}
 
 	private void setDialog (final Dialog dialog) {
@@ -117,6 +124,15 @@ public class UpdateDetailsDialog {
 			@Override
 			public void run () {
 				new DeleteExpire(UpdateDetailsDialog.this.context, UpdateDetailsDialog.this.update).execute();
+			}
+		});
+	}
+
+	protected void askClearUpdateUpdated () {
+		DialogHelper.askYesNo(this.context, "Reset to PENDING status?", "reset", "cancel", new Runnable() {
+			@Override
+			public void run () {
+				new ClearUpdateUpdated(UpdateDetailsDialog.this.context, UpdateDetailsDialog.this.update).execute();
 			}
 		});
 	}
@@ -185,6 +201,19 @@ public class UpdateDetailsDialog {
 		@Override
 		protected void modifyUpdate (final Client client) throws IOException {
 			client.deleteExpire(this.update);
+		}
+
+	}
+
+	private static class ClearUpdateUpdated extends ModifyUpdate {
+
+		public ClearUpdateUpdated (final Context context, final Update update) {
+			super(context, update);
+		}
+
+		@Override
+		protected void modifyUpdate (final Client client) throws IOException {
+			client.clearUpdateUpdated(this.update);
 		}
 
 	}
