@@ -47,7 +47,7 @@ public class NodeServlet extends HttpServlet {
 				getNodes(resp);
 			}
 		}
-		catch (SQLException e) {
+		catch (final SQLException e) {
 			LOG.warn("Failed to read nodes.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to read nodes: " + e.getMessage());
 			return;
@@ -58,23 +58,23 @@ public class NodeServlet extends HttpServlet {
 		try {
 			AsciiTable.printTable(UpdateHelper.allNodesAsTable(this.dataStore), new String[] { "node", "updated" }, resp);
 		}
-		catch (SQLException e) {
+		catch (final SQLException e) {
 			LOG.warn("Failed to read data from store.", e);
 			throw new ServletException(e.getMessage());
 		}
 	}
 
 	private void getNodeValue (final HttpServletRequest req, final HttpServletResponse resp) throws IOException, SQLException {
-		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
+		final String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
-		String keyName = ServletHelper.extractPathElement(req, 2);
+		final String keyName = ServletHelper.extractPathElement(req, 2);
 		if (keyName == null) {
 			UpdateHelper.printUpdates(this.dataStore.getUpdates(nodeName), resp);
 		}
 		else {
-			String propName = ServletHelper.extractPathElement(req, 3);
-			Update update = this.dataStore.getUpdate(nodeName, keyName);
+			final String propName = ServletHelper.extractPathElement(req, 3);
+			final Update update = this.dataStore.getUpdate(nodeName, keyName);
 			if (update != null) {
 				if (propName == null) {
 					resp.getWriter().print(update.getValue());
@@ -99,39 +99,69 @@ public class NodeServlet extends HttpServlet {
 
 	@Override
 	protected void doPut (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
+		final String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
-		String pw = this.passwdGen.makePasswd();
-		String hashpw = BCrypt.hashpw(pw, BCrypt.gensalt());
+		final String keyName = ServletHelper.extractPathElement(req, 2);
+		if (keyName == null) {
+			resetNodePassword(resp, nodeName);
+		}
+		else {
+			final String propName = ServletHelper.extractPathElement(req, 3);
+			if (propName == null) {
+				clearUpdateUpdated(resp, nodeName, keyName);
+			}
+			else {
+				ServletHelper.error(resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Can put PUT to property: " + propName + "'.");
+			}
+		}
+	}
+
+	private void resetNodePassword (final HttpServletResponse resp, final String nodeName) throws IOException {
+		final String pw = this.passwdGen.makePasswd();
+		final String hashpw = BCrypt.hashpw(pw, BCrypt.gensalt());
 
 		try {
 			this.dataStore.upsertNode(nodeName, hashpw);
 		}
-		catch (SQLException e) {
+		catch (final SQLException e) {
 			LOG.warn("Failed to store node.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to store node: " + e.getMessage());
 			return;
 		}
 
 		resp.setStatus(HttpServletResponse.SC_CREATED);
-		Table<Integer, String, String> table = TreeBasedTable.create();
+		final Table<Integer, String, String> table = TreeBasedTable.create();
 		table.put(Integer.valueOf(0), "node", nodeName);
 		table.put(Integer.valueOf(0), "pw", pw);
 		AsciiTable.printTable(table, new String[] { "node", "pw" }, resp);
 	}
 
+	private void clearUpdateUpdated (final HttpServletResponse resp, final String nodeName, final String keyName) throws IOException {
+		try {
+			if (this.dataStore.clearUpdateUpdated(nodeName, keyName) < 1) {
+				ServletHelper.error(resp, HttpServletResponse.SC_NOT_FOUND, "Failed to clear value for key '" + keyName + "' for node '" + nodeName + "'.");
+				return;
+			}
+		}
+		catch (final SQLException e) {
+			LOG.warn("Failed to clear value.", e);
+			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to clear value: " + e.getMessage());
+			return;
+		}
+	}
+
 	@Override
 	protected void doDelete (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
+		final String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
-		String keyName = ServletHelper.extractPathElement(req, 2);
+		final String keyName = ServletHelper.extractPathElement(req, 2);
 		if (keyName == null) {
 			deleteNode(resp, nodeName);
 		}
 		else {
-			String propName = ServletHelper.extractPathElement(req, 3);
+			final String propName = ServletHelper.extractPathElement(req, 3);
 			if (propName == null) {
 				deleteKey(resp, nodeName, keyName);
 			}
@@ -156,7 +186,7 @@ public class NodeServlet extends HttpServlet {
 				return;
 			}
 		}
-		catch (SQLException e) {
+		catch (final SQLException e) {
 			LOG.warn("Failed to delete node.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete node: " + e.getMessage());
 			return;
@@ -170,7 +200,7 @@ public class NodeServlet extends HttpServlet {
 				return;
 			}
 		}
-		catch (SQLException e) {
+		catch (final SQLException e) {
 			LOG.warn("Failed to delete key.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete key: " + e.getMessage());
 			return;
@@ -179,21 +209,21 @@ public class NodeServlet extends HttpServlet {
 
 	@Override
 	protected void doPost (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		String nodeName = ServletHelper.extractPathElement(req, 1, resp);
+		final String nodeName = ServletHelper.extractPathElement(req, 1, resp);
 		if (nodeName == null) return;
 
-		String keyName = ServletHelper.extractPathElement(req, 2, resp);
+		final String keyName = ServletHelper.extractPathElement(req, 2, resp);
 		if (keyName == null) return;
 
-		String propName = ServletHelper.extractPathElement(req, 3, resp);
+		final String propName = ServletHelper.extractPathElement(req, 3, resp);
 		if (propName == null) return;
 
 		if ("threshold".equals(propName)) {
-			String threshold = StringHelper.readerFirstLine(req, 50);
+			final String threshold = StringHelper.readerFirstLine(req, 50);
 			setThreshold(resp, nodeName, keyName, threshold);
 		}
 		else if ("expire".equals(propName)) {
-			String expire = StringHelper.readerFirstLine(req, 50);
+			final String expire = StringHelper.readerFirstLine(req, 50);
 			setExpire(resp, nodeName, keyName, expire);
 		}
 		else {
@@ -209,7 +239,7 @@ public class NodeServlet extends HttpServlet {
 				return;
 			}
 		}
-		catch (SQLException e) {
+		catch (final SQLException e) {
 			LOG.warn("Failed to set threshold.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to set threshold: " + e.getMessage());
 			return;
@@ -223,7 +253,7 @@ public class NodeServlet extends HttpServlet {
 				return;
 			}
 		}
-		catch (SQLException e) {
+		catch (final SQLException e) {
 			LOG.warn("Failed to set expire.", e);
 			ServletHelper.error(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to set expire: " + e.getMessage());
 			return;

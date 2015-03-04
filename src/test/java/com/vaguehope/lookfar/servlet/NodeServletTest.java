@@ -116,6 +116,20 @@ public class NodeServletTest {
 	}
 
 	/**
+	 * PUT /node/$nodeName/$keyName
+	 */
+	@Test
+	public void itClearsUpdateUpdated () throws Exception {
+		this.req.setPathInfo("/my_node/some_key");
+		when(this.dataStore.clearUpdateUpdated("my_node", "some_key")).thenReturn(1);
+
+		this.undertest.doPut(this.req, this.resp);
+
+		verify(this.dataStore).clearUpdateUpdated("my_node", "some_key");
+		assertEquals(200, this.resp.getStatus());
+	}
+
+	/**
 	 * DELETE /node/$nodeName/$keyName
 	 */
 	@SuppressWarnings("boxing")
@@ -222,7 +236,7 @@ public class NodeServletTest {
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	private List<Node> givenSomeNodes (int n) throws SQLException {
+	private List<Node> givenSomeNodes (final int n) throws SQLException {
 		List<Node> nodes = Lists.newArrayList();
 		for (int i = 0; i < n; i++) {
 			nodes.add(new Node("node" + i, new Date()));
@@ -231,21 +245,21 @@ public class NodeServletTest {
 		return nodes;
 	}
 
-	private Update givenSingleNodeWithUpdate (String nodeName, String key, String value) throws Exception {
+	private Update givenSingleNodeWithUpdate (final String nodeName, final String key, final String value) throws Exception {
 		return givenSingleNodeWithUpdate(nodeName, key, value, null, null);
 	}
 
-	private Update givenSingleNodeWithUpdate (String nodeName, String key, String value, String threshold, String expire) throws Exception {
+	private Update givenSingleNodeWithUpdate (final String nodeName, final String key, final String value, final String threshold, final String expire) throws Exception {
 		Update update = new Update(nodeName, new Date(), key, value, threshold, ThresholdStatus.OK, expire, ExpireStatus.OK);
 		when(this.dataStore.getUpdate(nodeName, key)).thenReturn(update);
 		when(this.dataStore.getUpdates(nodeName)).thenReturn(ImmutableList.of(update));
 		return update;
 	}
 
-	private static Iterable<String> getNodeNames (List<Node> nodes) {
+	private static Iterable<String> getNodeNames (final List<Node> nodes) {
 		Iterable<String> nodeNames = Collections2.transform(nodes, new Function<Node, String>() {
 			@Override
-			public String apply (Node in) {
+			public String apply (final Node in) {
 				return in.getNode();
 			}
 		});
