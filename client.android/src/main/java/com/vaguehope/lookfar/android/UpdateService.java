@@ -64,7 +64,7 @@ public class UpdateService extends IntentService {
 		}
 		catch (final Exception e) {
 			Log.i(C.TAG, "UpdateService failed: " + e);
-			updateNotification(this, "Lookfar update failed", e.getMessage(), 0);
+			updateNotification(this, "Lookfar update failed", e.getMessage(), 0, false);
 		}
 		finally {
 			wl.release();
@@ -106,7 +106,7 @@ public class UpdateService extends IntentService {
 		}
 
 		Log.i(C.TAG, String.format("title{%s} msg{%s}.", title, msg));
-		updateNotification(this, title.toString(), msg.toString(), count);
+		updateNotification(this, title.toString(), msg.toString(), count, true);
 	}
 
 	private static Map<String, Update> updatesMap (final List<Update> updates) {
@@ -117,7 +117,7 @@ public class UpdateService extends IntentService {
 		return ret;
 	}
 
-	private static void updateNotification (final Context context, final CharSequence title, final CharSequence msg, final int count) {
+	private static void updateNotification (final Context context, final CharSequence title, final CharSequence msg, final int count, final boolean urgent) {
 		final NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		if (msg != null && msg.length() > 0) {
 			final Intent notificationIntent = new Intent(context, MainActivity.class);
@@ -133,7 +133,7 @@ public class UpdateService extends IntentService {
 					.setContentIntent(contentIntent)
 					.setAutoCancel(true)
 					.setWhen(System.currentTimeMillis())
-					.setDefaults(Notification.DEFAULT_ALL);
+					.setDefaults(urgent ? Notification.DEFAULT_ALL : 0);
 			nm.notify(NOTIFICAITON_ID_ALERT, nb.build());
 		}
 		else {
