@@ -69,14 +69,13 @@ public class TwitterProducer {
 				continue;
 			}
 
-			final UpdateFlag nextFlag = nextUpdate.calculateFlag();
-			if (nextFlag == UpdateFlag.OK) continue;
-
 			final UpdateFlag prevFlag = prevUpdate.calculateFlag();
+			final UpdateFlag nextFlag = nextUpdate.calculateFlag();
 			if (nextFlag == prevFlag) continue;
 
 			if (tweet == null) tweet = new StringBuilder(node);
-			tweet.append(String.format(" | %s=%s %s --> %s", nextUpdate.getKey(), nextUpdate.getValue(), prevFlag, nextFlag));
+			tweet.append(String.format(" | %s=%s %s",
+					nextUpdate.getKey(), nextUpdate.getValue(), nextFlag));
 		}
 
 		if (tweet != null) {
