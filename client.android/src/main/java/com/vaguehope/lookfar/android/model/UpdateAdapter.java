@@ -1,7 +1,10 @@
 package com.vaguehope.lookfar.android.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.vaguehope.lookfar.android.R;
 import com.vaguehope.lookfar.android.util.TimeHelper;
@@ -14,6 +17,8 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 public class UpdateAdapter extends BaseAdapter {
+
+	private static final Set<String> OK_STATUSES = new HashSet<String>(Arrays.asList("OK", "PENDING"));
 
 	private final List<Update> data = new ArrayList<Update>();
 	private final List<Update> filteredData = new ArrayList<Update>();
@@ -40,7 +45,7 @@ public class UpdateAdapter extends BaseAdapter {
 	private void updateFiltered () {
 		this.filteredData.clear();
 		for (Update u : this.data) {
-			if (this.showAll || !"OK".equals(u.getFlag())) this.filteredData.add(u);
+			if (this.showAll || !OK_STATUSES.contains(u.getFlag())) this.filteredData.add(u);
 		}
 	}
 
