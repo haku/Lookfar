@@ -93,6 +93,11 @@ public class MainActivity extends Activity {
 			case R.id.mnuRefresh:
 				new FetchUpdates(this, this.lvUpdatesAdapter).execute();
 				return true;
+			case R.id.mnuShowAll:
+				item.setChecked(!item.isChecked());
+				item.setTitle(item.isChecked() ? "Fliter" : "All");
+				this.lvUpdatesAdapter.setShowAll(item.isChecked());
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}

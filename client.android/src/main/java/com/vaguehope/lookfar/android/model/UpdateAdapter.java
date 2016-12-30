@@ -3,6 +3,9 @@ package com.vaguehope.lookfar.android.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaguehope.lookfar.android.R;
+import com.vaguehope.lookfar.android.util.TimeHelper;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,33 +13,46 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.vaguehope.lookfar.android.R;
-import com.vaguehope.lookfar.android.util.TimeHelper;
-
 public class UpdateAdapter extends BaseAdapter {
 
-	private final List<Update> updates = new ArrayList<Update>();
+	private final List<Update> data = new ArrayList<Update>();
+	private final List<Update> filteredData = new ArrayList<Update>();
 	private final LayoutInflater layoutInflater;
+	private boolean showAll;
 
 	public UpdateAdapter (final Context context) {
 		this.layoutInflater = LayoutInflater.from(context);
 	}
 
 	public void setData (final List<Update> newData) {
-		this.updates.clear();
-		this.updates.addAll(newData);
+		this.data.clear();
+		this.data.addAll(newData);
+		updateFiltered();
 		notifyDataSetChanged();
 	}
 
+	public void setShowAll (final boolean showAll) {
+		this.showAll = showAll;
+		updateFiltered();
+		notifyDataSetChanged();
+	}
+
+	private void updateFiltered () {
+		this.filteredData.clear();
+		for (Update u : this.data) {
+			if (this.showAll || !"OK".equals(u.getFlag())) this.filteredData.add(u);
+		}
+	}
+
 	public Update getUpdate (final int position) {
-		if (this.updates == null) return null;
-		if (position >= this.updates.size()) return null;
-		return this.updates.get(position);
+		if (this.filteredData == null) return null;
+		if (position >= this.filteredData.size()) return null;
+		return this.filteredData.get(position);
 	}
 
 	@Override
 	public int getCount () {
-		return this.updates == null ? 0 : this.updates.size();
+		return this.filteredData == null ? 0 : this.filteredData.size();
 	}
 
 	@Override
@@ -61,7 +77,7 @@ public class UpdateAdapter extends BaseAdapter {
 		else {
 			rowView = (RowView) view.getTag();
 		}
-		rowView.setItem(this.updates.get(position));
+		rowView.setItem(this.filteredData.get(position));
 		return view;
 	}
 
