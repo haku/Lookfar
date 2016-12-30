@@ -1,5 +1,6 @@
 package com.vaguehope.lookfar.android.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
@@ -14,12 +15,17 @@ import com.vaguehope.lookfar.android.util.TimeHelper;
 
 public class UpdateAdapter extends BaseAdapter {
 
-	private final List<Update> updates;
+	private final List<Update> updates = new ArrayList<Update>();
 	private final LayoutInflater layoutInflater;
 
-	public UpdateAdapter (final Context context, final List<Update> updates) {
-		this.updates = updates;
+	public UpdateAdapter (final Context context) {
 		this.layoutInflater = LayoutInflater.from(context);
+	}
+
+	public void setData (final List<Update> newData) {
+		this.updates.clear();
+		this.updates.addAll(newData);
+		notifyDataSetChanged();
 	}
 
 	public Update getUpdate (final int position) {

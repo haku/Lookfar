@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
 
 	private static final LogWrapper LOG = new LogWrapper("MA");
 	private ListView lvUpdates;
+	private UpdateAdapter lvUpdatesAdapter;
 
 //	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //	Life cycle events.
@@ -75,7 +76,9 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		if (this.lvUpdates.getAdapter() == null) new FetchUpdates(MainActivity.this, this.lvUpdates).execute();
+		this.lvUpdatesAdapter = new UpdateAdapter(this);
+		this.lvUpdates.setAdapter(this.lvUpdatesAdapter);
+		new FetchUpdates(this, this.lvUpdatesAdapter).execute();
 	}
 
 	@Override
@@ -88,7 +91,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected (final MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.mnuRefresh:
-				new FetchUpdates(MainActivity.this, this.lvUpdates).execute();
+				new FetchUpdates(this, this.lvUpdatesAdapter).execute();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -100,13 +103,13 @@ public class MainActivity extends Activity {
 	private static class FetchUpdates extends AsyncTask<Void, Void, Result<List<Update>>> {
 
 		private final Context context;
-		private final ListView lvUpdates;
+		private final UpdateAdapter lvUpdatesAdapter;
 
 		private ProgressDialog dialog;
 
-		public FetchUpdates (final Context context, final ListView lvUpdates) {
+		public FetchUpdates (final Context context, final UpdateAdapter lvUpdatesAdapter) {
 			this.context = context;
-			this.lvUpdates = lvUpdates;
+			this.lvUpdatesAdapter = lvUpdatesAdapter;
 		}
 
 		@Override
@@ -128,7 +131,7 @@ public class MainActivity extends Activity {
 		protected void onPostExecute (final Result<List<Update>> result) {
 			this.dialog.dismiss();
 			if (result.isSuccess()) {
-				this.lvUpdates.setAdapter(new UpdateAdapter(this.context, result.getData()));
+				this.lvUpdatesAdapter.setData(result.getData());
 			}
 			else {
 				LOG.e("Failed to fetch updates.", result.getE());
