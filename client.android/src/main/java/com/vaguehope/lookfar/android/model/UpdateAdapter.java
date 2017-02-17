@@ -6,9 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.vaguehope.lookfar.android.R;
-import com.vaguehope.lookfar.android.util.TimeHelper;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +13,13 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.vaguehope.lookfar.android.R;
+import com.vaguehope.lookfar.android.util.StringHelper;
+import com.vaguehope.lookfar.android.util.TimeHelper;
+
 public class UpdateAdapter extends BaseAdapter {
 
-	private static final Set<String> OK_STATUSES = new HashSet<String>(Arrays.asList("OK", "PENDING"));
+	protected static final Set<String> OK_STATUSES = new HashSet<String>(Arrays.asList("OK", "PENDING"));
 
 	private final List<Update> data = new ArrayList<Update>();
 	private final List<Update> filteredData = new ArrayList<Update>();
@@ -45,7 +46,11 @@ public class UpdateAdapter extends BaseAdapter {
 	private void updateFiltered () {
 		this.filteredData.clear();
 		for (Update u : this.data) {
-			if (this.showAll || !OK_STATUSES.contains(u.getFlag())) this.filteredData.add(u);
+			if (this.showAll
+					|| !OK_STATUSES.contains(u.getFlag())
+					|| StringHelper.isEmpty(u.getThreshold())) {
+				this.filteredData.add(u);
+			}
 		}
 	}
 
@@ -112,9 +117,18 @@ public class UpdateAdapter extends BaseAdapter {
 
 		public void setItem (final Update item) {
 			this.node.setText(item.getNode());
-			this.flag.setText(item.getFlag());
 			this.key.setText(item.getKey());
 			this.updated.setText(TimeHelper.humanTimeSpan(item.getUpdated(), System.currentTimeMillis()));
+
+			final String status;
+			if (StringHelper.isEmpty(item.getThreshold()) && OK_STATUSES.contains(item.getFlag())) {
+				status = "NO THRESHOLD";
+			}
+			else {
+				status = item.getFlag();
+			}
+			this.flag.setText(status);
+
 			this.value.setText(item.getValue());
 		}
 	}
